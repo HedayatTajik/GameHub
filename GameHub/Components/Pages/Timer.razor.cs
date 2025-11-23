@@ -1,13 +1,18 @@
 
+using ImposterGame.Models;
+using ImposterGame.Services;
 using Microsoft.AspNetCore.Components;
-using System.Net.NetworkInformation;
 
 
 namespace ImposterGame.Pages
 {
     public partial class Timer : ComponentBase
     {
-        [Parameter] [SupplyParameterFromQuery] public int PlayerCount { get; set; } = 3;
+        [Parameter][SupplyParameterFromQuery] public int PlayerCount { get; set; } = 3;
+        [Inject] public GameService GameService { get; set; } = default!;
+        Random random = new Random();
+        public List<Player> PlayerList { get; set; } = new (); 
+        public string PersonStart = "";
 
         [Inject] private NavigationManager NavigationManager { get; set; } = default!;
         public int timeLeft = 180;
@@ -18,6 +23,7 @@ namespace ImposterGame.Pages
         {
             timeLeft = 60 * PlayerCount;
             _ = StartTimer();
+            RandomPersonStart();
         }
         public async Task StartTimer()
         {
@@ -36,6 +42,12 @@ namespace ImposterGame.Pages
             isRunning = false;
         }
 
+        public void RandomPersonStart()
+        {
+            PlayerList = GameService.ListNewPlayers();
+            int randomIndex = random.Next(0, PlayerList.Count);
+            PersonStart = PlayerList[randomIndex].Name;
+        }
         public void StartAgain()
         {
             NavigationManager.NavigateTo($"/impostergame");

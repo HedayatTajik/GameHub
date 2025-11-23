@@ -21,25 +21,27 @@ namespace ImposterGame.Pages
 
         public Player CurrentPlayer => GameService.Players[currentIndex];
 
-        protected override void OnInitialized()
+        protected override async Task OnInitializedAsync()
         {
             // Load existing players from GameService (state is preserved!)
             players = GameService.Players;
+            await GameService.LoadPlayersAsync();
         }
 
-        public void AddPlayer()
+        public async Task AddPlayer() // 👈 Make this method async
         {
             if (!string.IsNullOrWhiteSpace(newPlayer.Name) &&
                 !string.IsNullOrEmpty(selectedAvatar))
             {
-                var player = new Player
-                {
-                    Id = nextPlayerId++,
-                    Name = newPlayer.Name,
-                    Uri = selectedAvatar
-                };
+                // 1. Call the service method to create and add the player
+                await GameService.AddNewPlayerAsync(
+                    id: nextPlayerId,
+                    name: newPlayer.Name,
+                    uri: selectedAvatar
+                );
 
-                GameService.Players.Add(player);
+                // 2. Update the component state variables
+                nextPlayerId++; // Increment ID for the next player
 
                 players = GameService.ListNewPlayers();
 

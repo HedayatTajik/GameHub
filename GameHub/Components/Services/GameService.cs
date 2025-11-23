@@ -1,4 +1,6 @@
 ﻿using ImposterGame.Models;
+using Microsoft.JSInterop;
+using System.Text.Json;
 
 namespace ImposterGame.Services
 {
@@ -6,12 +8,14 @@ namespace ImposterGame.Services
     {
         private readonly WordService _wordService;
         private readonly Random _random = new();
-
+        private readonly IJSRuntime _jsRuntime;
+        private const string LocalStorageKey = "ImposterGamePlayers";
         public List<Player> Players { get; } = new();
 
-        public GameService(WordService wordService)
+        public GameService(WordService wordService, IJSRuntime jsRuntime) 
         {
             _wordService = wordService;
+            _jsRuntime = jsRuntime;
         }
 
         /// <summary>
@@ -33,17 +37,59 @@ namespace ImposterGame.Services
             }
         }
 
+        public async Task LoadPlayersAsync() 
+        {
+            try
+            {
+                var json = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", LocalStorageKey);
+                if (!string.IsNullOrEmpty(json))
+                {
+                    var storedPlayers = JsonSerializer.Deserialize<List<Player>>(json);
+                    if (storedPlayers != null)
+                    {
+                        Players.Clear();
+                        Players.AddRange(storedPlayers);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading players: {ex.Message}");
+            }
+        }
+
+
+        private async Task SavePlayersAsync()
+        {
+            var json = JsonSerializer.Serialize(Players);
+            await _jsRuntime.InvokeVoidAsync("localStorage.setItem", LocalStorageKey, json);
+        }
+
         /// <summary>
         /// Removes a player from the game.
         /// </summary>
-        public Task<List<Player>> DeleteUser(Player player)
+        public async Task<List<Player>> DeleteUser(Player player)
         {
             if (player is not null)
             {
                 Players.Remove(player);
+                await SavePlayersAsync();
             }
 
-            return Task.FromResult(Players);
+            return Players;
+        }
+
+        public async Task AddNewPlayerAsync(int id, string name, string uri) 
+        {
+            var newPlayer = new Player
+            {
+                Id = id,
+                Name = name,
+                Uri = uri
+            };
+
+            Players.Add(newPlayer);
+            await SavePlayersAsync();
         }
 
         /// <summary>
