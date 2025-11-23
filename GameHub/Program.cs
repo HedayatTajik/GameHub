@@ -1,4 +1,6 @@
 using GameHub.Components;
+using ImposterGame.Services;
+using Radzen;
 
 namespace GameHub
 {
@@ -8,10 +10,11 @@ namespace GameHub
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
-
+            builder.Services.AddRadzenComponents();
+            builder.Services.AddScoped<WordService>();
+            builder.Services.AddScoped<GameService>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
