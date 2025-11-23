@@ -1,0 +1,23 @@
+﻿@inherits ImposterGame.Pages.SelectAvatar
+<RadzenStack Orientation="Orientation.Horizontal"
+             AlignItems="AlignItems.Center"
+             JustifyContent="JustifyContent.Center"
+             Wrap="FlexWrap.Wrap"
+             Gap="2px"
+             Style="
+                 max-width:100vw;
+                 margin-top:5px;
+                 max-height:40vh;
+                 overflow-y:auto;
+                 padding:1px;">
+
+    @foreach (var avatar in Avatars)
+    {
+        <RadzenCard Style="@GetAvatarStyle(avatar)"
+                    @onclick="() => SelectAvatarFunc(avatar)">
+
+            <RadzenImage Path="@avatar"
+                         Style="width:100%; height:100%; object-fit:cover;" />
+        </RadzenCard>
+    }
+</RadzenStack>

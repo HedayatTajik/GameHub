@@ -1,7 +1,21 @@
 ﻿@page "/"
+<RadzenCard Style="max-width:400px; margin:50px auto; text-align:center; padding:30px; border-radius:20px; box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+    <RadzenButton Text="🎭 بازی شیاد"
+                  Click="@GoToGame"
+                  Variant="Variant.Outlined"
+                  ButtonStyle="ButtonStyle.Info"
+                  Size="ButtonSize.Large"
+                  Shade="Shade.Darker"
+                  Style="width:100%; border-radius:12px; font-family:'Far_Morvarid'; font-size:1.2rem; font-weight:600;" />
 
-<PageTitle>Home</PageTitle>
+    <RadzenButton Text="درباره بازی شیاد"
+                  Click="@GoToAbout"
+                  Variant="Variant.Outlined"
+                  ButtonStyle="ButtonStyle.Info"
+                  Size="ButtonSize.Large"
+                  Shade="Shade.Darker"
+                  Style="width:100%; border-radius:12px; font-family:'Far_Morvarid'; font-size:1.2rem; font-weight:600; margin-top: 10px;" />
 
-<h1>Hello, world!</h1>
+</RadzenCard>
 
-Welcome to your new app.
+
