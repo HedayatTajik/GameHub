@@ -1,4 +1,4 @@
-﻿using ImposterGame.Models;
+using ImposterGame.Models;
 using Microsoft.JSInterop;
 using System.Text.Json;
 
@@ -6,13 +6,18 @@ namespace ImposterGame.Services
 {
     public class GameService
     {
+        public const int MinPlayers = 3;
+
         private readonly WordService _wordService;
-        private readonly Random _random = new();
         private readonly IJSRuntime _jsRuntime;
         private const string LocalStorageKey = "ImposterGamePlayers";
-        public List<Player> Players { get; } = new();
+        private bool _hasLoadedFromStorage;
 
-        public GameService(WordService wordService, IJSRuntime jsRuntime) 
+        public List<Player> Players { get; } = new();
+        public string CurrentWord { get; private set; } = string.Empty;
+        public bool HasActiveGame => Players.Count >= MinPlayers && Players.Any(p => p.IsImposter);
+
+        public GameService(WordService wordService, IJSRuntime jsRuntime)
         {
             _wordService = wordService;
             _jsRuntime = jsRuntime;
@@ -23,34 +28,68 @@ namespace ImposterGame.Services
         /// </summary>
         public void AssignRoles()
         {
-            if (!Players.Any()) return;
+            if (Players.Count < MinPlayers) return;
 
             var word = _wordService.GetRandomWord();
-            int imposterIndex = _random.Next(Players.Count);
+            int imposterIndex = Random.Shared.Next(Players.Count);
+            CurrentWord = word;
 
             for (int i = 0; i < Players.Count; i++)
             {
                 var player = Players[i];
                 player.IsImposter = i == imposterIndex;
-                player.Word = player.IsImposter ? null : word;
+                player.Word = player.IsImposter ? string.Empty : word;
                 player.HasViewedCard = false;
             }
         }
 
-        public async Task LoadPlayersAsync() 
+        /// <summary>
+        /// Clears role assignments and round state while keeping the player roster.
+        /// </summary>
+        public void ResetRound()
         {
+            CurrentWord = string.Empty;
+            foreach (var player in Players)
+            {
+                player.IsImposter = false;
+                player.Word = string.Empty;
+                player.HasViewedCard = false;
+            }
+        }
+
+        public async Task LoadPlayersAsync()
+        {
+            if (_hasLoadedFromStorage && Players.Count > 0)
+            {
+                return;
+            }
+
             try
             {
-                var json = await _jsRuntime.InvokeAsync<string>("localStorage.getItem", LocalStorageKey);
+                var json = await _jsRuntime.InvokeAsync<string?>("localStorage.getItem", LocalStorageKey);
                 if (!string.IsNullOrEmpty(json))
                 {
                     var storedPlayers = JsonSerializer.Deserialize<List<Player>>(json);
                     if (storedPlayers != null)
                     {
+                        var validPlayers = storedPlayers
+                            .Where(p => p is not null && !string.IsNullOrWhiteSpace(p.Name))
+                            .ToList();
+
                         Players.Clear();
-                        Players.AddRange(storedPlayers);
+                        Players.AddRange(validPlayers);
                     }
                 }
+
+                _hasLoadedFromStorage = true;
+            }
+            catch (InvalidOperationException)
+            {
+                // Prerendering: JS interop is not available yet.
+            }
+            catch (JSDisconnectedException)
+            {
+                // Circuit disconnected while reading storage.
             }
             catch (Exception ex)
             {
@@ -58,11 +97,31 @@ namespace ImposterGame.Services
             }
         }
 
-
         private async Task SavePlayersAsync()
         {
-            var json = JsonSerializer.Serialize(Players);
-            await _jsRuntime.InvokeVoidAsync("localStorage.setItem", LocalStorageKey, json);
+            try
+            {
+                var json = JsonSerializer.Serialize(Players);
+                await _jsRuntime.InvokeVoidAsync("localStorage.setItem", LocalStorageKey, json);
+            }
+            catch (InvalidOperationException)
+            {
+                // Prerendering: JS interop is not available yet.
+            }
+            catch (JSDisconnectedException)
+            {
+                // Circuit disconnected while saving storage.
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error saving players: {ex.Message}");
+            }
+        }
+
+        public bool PlayerNameExists(string name)
+        {
+            var trimmed = name.Trim();
+            return Players.Any(p => string.Equals(p.Name.Trim(), trimmed, StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
@@ -79,12 +138,13 @@ namespace ImposterGame.Services
             return Players;
         }
 
-        public async Task AddNewPlayerAsync(int id, string name, string uri) 
+        public async Task AddNewPlayerAsync(string name, string uri)
         {
+            var nextId = Players.Count > 0 ? Players.Max(p => p.Id) + 1 : 1;
             var newPlayer = new Player
             {
-                Id = id,
-                Name = name,
+                Id = nextId,
+                Name = name.Trim(),
                 Uri = uri
             };
 
