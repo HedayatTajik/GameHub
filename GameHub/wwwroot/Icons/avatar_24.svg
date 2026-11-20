@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <clipPath id="h24"><circle cx="64" cy="64" r="64"/></clipPath>
+  </defs>
+  <g clip-path="url(#h24)">
+    <circle cx="64" cy="64" r="64" fill="#FEF9C3"/>
+    <!-- Cozy Cardigan -->
+    <path d="M20 132 C24 98 42 90 64 90 C86 90 104 98 108 132 Z" fill="#57534E"/>
+    <polygon points="48,92 64,128 80,92" fill="#F8FAFC"/>
+    <!-- Bowtie -->
+    <polygon points="52,96 64,102 52,108" fill="#E85D4A"/>
+    <polygon points="76,96 64,102 76,108" fill="#E85D4A"/>
+    <circle cx="64" cy="102" r="3.5" fill="#C2410C"/>
+    <!-- Neck & Ears -->
+    <rect x="56" y="79" width="16" height="14" rx="6" fill="#EBB995"/>
+    <circle cx="40" cy="64" r="6.5" fill="#F4C5A3"/>
+    <circle cx="88" cy="64" r="6.5" fill="#F4C5A3"/>
+    <!-- Silver Hair Sides -->
+    <circle cx="42" cy="50" r="10" fill="#CBD5E1"/>
+    <circle cx="86" cy="50" r="10" fill="#CBD5E1"/>
+    <!-- Face -->
+    <rect x="42" y="40" width="44" height="46" rx="22" fill="#FAD2B4"/>
+    <!-- Silver Eyebrows & Happy Eyes -->
+    <path d="M47 55 Q53 51 59 55" fill="none" stroke="#94A3B8" stroke-width="3.2" stroke-linecap="round"/>
+    <path d="M69 55 Q75 51 81 55" fill="none" stroke="#94A3B8" stroke-width="3.2" stroke-linecap="round"/>
+    <path d="M49 63 Q53 59 57 63" fill="none" stroke="#1E1B2E" stroke-width="2.8" stroke-linecap="round"/>
+    <path d="M71 63 Q75 59 79 63" fill="none" stroke="#1E1B2E" stroke-width="2.8" stroke-linecap="round"/>
+    <!-- Rosy Cheeks -->
+    <ellipse cx="47" cy="69" rx="4.6" ry="2.6" fill="#FDA4AF" opacity="0.6"/>
+    <ellipse cx="81" cy="69" rx="4.6" ry="2.6" fill="#FDA4AF" opacity="0.6"/>
+    <!-- Fluffy Silver Mustache & Smile -->
+    <path d="M49 74 Q57 67 64 73 Q71 67 79 74 Q71 79 64 76 Q57 79 49 74 Z" fill="#E2E8F0"/>
+    <path d="M58 80 Q64 84 70 80" fill="none" stroke="#8C4A33" stroke-width="2.4" stroke-linecap="round"/>
+  </g>
+</svg>

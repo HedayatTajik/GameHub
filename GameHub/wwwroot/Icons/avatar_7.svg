@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <clipPath id="c27"><circle cx="64" cy="64" r="64"/></clipPath>
+  </defs>
+  <g clip-path="url(#c27)">
+    <circle cx="64" cy="64" r="64" fill="#FFE4E6"/>
+    <!-- Headband Tails -->
+    <path d="M90 48 Q106 42 114 54" fill="none" stroke="#E85D4A" stroke-width="7" stroke-linecap="round"/>
+    <path d="M92 52 Q105 56 112 68" fill="none" stroke="#DC2626" stroke-width="6" stroke-linecap="round"/>
+    <!-- Outfit -->
+    <path d="M22 132 C26 98 42 90 64 90 C86 90 102 98 106 132 Z" fill="#1E293B"/>
+    <path d="M48 92 L64 114 L80 92" fill="none" stroke="#E85D4A" stroke-width="5" stroke-linecap="round"/>
+    <!-- Hood -->
+    <circle cx="64" cy="62" r="31" fill="#1E293B"/>
+    <!-- Red Headband -->
+    <path d="M34 50 Q64 44 94 50 L94 57 Q64 51 34 57 Z" fill="#E85D4A"/>
+    <!-- Eye Opening -->
+    <rect x="41" y="54" width="46" height="18" rx="9" fill="#FAD2B0"/>
+    <!-- Determined Cute Eyes -->
+    <circle cx="53" cy="64" r="4" fill="#0F172A"/>
+    <circle cx="75" cy="64" r="4" fill="#0F172A"/>
+    <circle cx="51.8" cy="62.5" r="1.4" fill="#FFFFFF"/>
+    <circle cx="73.8" cy="62.5" r="1.4" fill="#FFFFFF"/>
+    <path d="M47 58 L58 60" stroke="#1E293B" stroke-width="2.6" stroke-linecap="round"/>
+    <path d="M81 58 L70 60" stroke="#1E293B" stroke-width="2.6" stroke-linecap="round"/>
+  </g>
+</svg>

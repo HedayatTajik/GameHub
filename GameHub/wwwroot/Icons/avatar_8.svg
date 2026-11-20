@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <clipPath id="c28"><circle cx="64" cy="64" r="64"/></clipPath>
+  </defs>
+  <g clip-path="url(#c28)">
+    <circle cx="64" cy="64" r="64" fill="#F3E8FF"/>
+    <!-- Royal Cloak -->
+    <path d="M20 132 C24 98 42 90 64 90 C86 90 104 98 108 132 Z" fill="#7C3AED"/>
+    <path d="M46 92 Q64 106 82 92 L78 132 L50 132 Z" fill="#FDE68A"/>
+    <!-- Neck & Ears -->
+    <rect x="56" y="80" width="16" height="14" rx="6" fill="#F2B892"/>
+    <circle cx="40" cy="66" r="6" fill="#F6C39B"/>
+    <circle cx="88" cy="66" r="6" fill="#F6C39B"/>
+    <!-- Hair Back -->
+    <circle cx="64" cy="58" r="27" fill="#4C1D95"/>
+    <!-- Face -->
+    <rect x="42" y="46" width="44" height="42" rx="21" fill="#FAD2B0"/>
+    <!-- Hair Bangs -->
+    <path d="M40 58 C42 42 54 38 66 42 C76 45 84 48 86 58 C82 48 72 48 64 50 C52 52 44 50 40 58 Z" fill="#4C1D95"/>
+    <!-- Eyes & Smile -->
+    <circle cx="53" cy="65" r="3.6" fill="#1E1B2E"/>
+    <circle cx="75" cy="65" r="3.6" fill="#1E1B2E"/>
+    <ellipse cx="47" cy="72" rx="4.5" ry="2.6" fill="#FDA4AF" opacity="0.6"/>
+    <ellipse cx="81" cy="72" rx="4.5" ry="2.6" fill="#FDA4AF" opacity="0.6"/>
+    <path d="M56 75 Q64 81 72 75" fill="none" stroke="#8C4A33" stroke-width="2.8" stroke-linecap="round"/>
+    <!-- Golden Crown -->
+    <polygon points="44,42 47,22 57,32 64,18 71,32 81,22 84,42" fill="#F59E0B"/>
+    <rect x="44" y="38" width="40" height="6" rx="3" fill="#D97706"/>
+    <circle cx="64" cy="31" r="2.8" fill="#E85D4A"/>
+  </g>
+</svg>

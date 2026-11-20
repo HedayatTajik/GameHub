@@ -1,3 +1,4 @@
+using ImposterGame.Services;
 using Microsoft.AspNetCore.Components;
 
 namespace ImposterGame.Pages
@@ -12,10 +13,9 @@ namespace ImposterGame.Pages
 
         protected override void OnInitialized()
         {
-            const string folderPath = "Icons";
-            for (int i = 1; i <= 20; i++)
+            for (int i = 1; i <= GameService.AvatarCount; i++)
             {
-                Avatars.Add($"/{folderPath}/avatar_{i}.png");
+                Avatars.Add(GameService.GetAvatarUri(i));
             }
         }
 
@@ -24,39 +24,19 @@ namespace ImposterGame.Pages
             await OnAvatarSelected.InvokeAsync(avatar);
         }
 
-        // Frontend styling for each avatar option
-        protected string GetAvatarStyle(string avatar)
+        protected string GetAvatarCssClass(string avatar)
         {
-            var isSelected = avatar == AfterSelectAvatar;
-            var isUsed = UsedAvatars?.Contains(avatar) == true;
-
-            var style = @"
-                width:5rem;
-                height:5rem;
-                border-radius:50%;
-                overflow:hidden;
-                display:flex;
-                align-items:center;
-                justify-content:center;
-                cursor:pointer;
-                padding:0;
-                transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out, border-color 0.15s ease-in-out;
-            ";
-
-            if (isSelected)
+            if (avatar == AfterSelectAvatar)
             {
-                style += "border: 3px solid #4a90e2; transform: scale(1.08); box-shadow: 0 0 10px rgba(74, 144, 226, 0.55);";
-            }
-            else if (isUsed)
-            {
-                style += "border: 2px solid #cbd5e1; opacity: 0.45; box-shadow: 0 2px 4px rgba(0,0,0,0.1);";
-            }
-            else
-            {
-                style += "border: 2px solid transparent; box-shadow: 0 3px 8px rgba(0,0,0,0.2);";
+                return "avatar-option selected";
             }
 
-            return style;
+            if (UsedAvatars?.Contains(avatar) == true)
+            {
+                return "avatar-option used";
+            }
+
+            return "avatar-option";
         }
     }
 }

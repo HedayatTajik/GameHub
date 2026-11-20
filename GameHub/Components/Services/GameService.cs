@@ -7,15 +7,66 @@ namespace ImposterGame.Services
     public class GameService
     {
         public const int MinPlayers = 3;
+        public const int MinPlayersForTwoImposters = 5;
+        public const int MinRoundMinutes = 1;
+        public const int MaxRoundMinutes = 15;
+        public const int AvatarCount = 26;
+
+        public static string GetAvatarUri(int index)
+        {
+            var normalized = ((Math.Max(1, index) - 1) % AvatarCount) + 1;
+            return $"/Icons/avatar_{normalized}.svg";
+        }
+
+        private static bool IsValidAvatarUri(string? uri)
+        {
+            if (string.IsNullOrWhiteSpace(uri))
+            {
+                return false;
+            }
+
+            for (int i = 1; i <= AvatarCount; i++)
+            {
+                if (string.Equals(uri, GetAvatarUri(i), StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
         private readonly WordService _wordService;
         private readonly IJSRuntime _jsRuntime;
         private const string LocalStorageKey = "ImposterGamePlayers";
+        private const string SettingsStorageKey = "ImposterGameSettings";
+
         private bool _hasLoadedFromStorage;
+        private bool _hasLoadedSettings;
 
         public List<Player> Players { get; } = new();
+        public GameSettings Settings { get; private set; } = new();
+        public IReadOnlyList<WordCategory> Categories => _wordService.Categories;
+
+        public event Action? OnSettingsChanged;
+        public event Action? OnGameStateChanged;
+
         public string CurrentWord { get; private set; } = string.Empty;
+        public string CurrentCategoryName { get; private set; } = string.Empty;
+        public string CurrentCategoryIcon { get; private set; } = string.Empty;
+        public WordDifficulty CurrentDifficulty { get; private set; } = WordDifficulty.Medium;
+        public int ActiveImposterCount { get; private set; }
+        public bool IsGameInProgress { get; private set; }
+
         public bool HasActiveGame => Players.Count >= MinPlayers && Players.Any(p => p.IsImposter);
+
+        public static string GetDifficultyLabel(WordDifficulty difficulty) => difficulty switch
+        {
+            WordDifficulty.Easy => "🟢 آسان",
+            WordDifficulty.Medium => "🟡 متوسط",
+            WordDifficulty.Hard => "🔴 سخت",
+            _ => "🟡 متوسط"
+        };
 
         public GameService(WordService wordService, IJSRuntime jsRuntime)
         {
@@ -23,38 +74,78 @@ namespace ImposterGame.Services
             _jsRuntime = jsRuntime;
         }
 
+        public int GetMaxImposters() => Players.Count >= MinPlayersForTwoImposters ? 2 : 1;
+
+        public int GetEffectiveImposterCount() => Math.Clamp(Settings.ImposterCount, 1, GetMaxImposters());
+
+        public int GetRoundDurationSeconds()
+        {
+            if (Settings.AutoTimePerPlayer)
+            {
+                return Math.Max(1, Players.Count) * 60;
+            }
+
+            return Math.Clamp(Settings.RoundDurationMinutes, MinRoundMinutes, MaxRoundMinutes) * 60;
+        }
+
+        public int GetActiveWordPoolCount() =>
+            _wordService.GetWordCount(Settings.Difficulty, Settings.SelectedCategoryIds);
+
         /// <summary>
-        /// Assigns roles to all players: one imposter, others receive a word.
+        /// Assigns roles to all players: 1 or 2 imposters based on settings, others receive the word.
         /// </summary>
         public void AssignRoles()
         {
             if (Players.Count < MinPlayers) return;
 
-            var word = _wordService.GetRandomWord();
-            int imposterIndex = Random.Shared.Next(Players.Count);
-            CurrentWord = word;
+            var entry = _wordService.GetRandomWord(Settings.Difficulty, Settings.SelectedCategoryIds);
+            CurrentWord = entry.Word;
+            CurrentCategoryName = entry.CategoryName;
+            CurrentCategoryIcon = entry.CategoryIcon;
+            CurrentDifficulty = entry.Difficulty;
+
+            ActiveImposterCount = GetEffectiveImposterCount();
+
+            var indices = Enumerable.Range(0, Players.Count).ToArray();
+            for (int i = indices.Length - 1; i > 0; i--)
+            {
+                int j = Random.Shared.Next(i + 1);
+                (indices[i], indices[j]) = (indices[j], indices[i]);
+            }
+
+            var imposterIndices = new HashSet<int>(indices.Take(ActiveImposterCount));
 
             for (int i = 0; i < Players.Count; i++)
             {
                 var player = Players[i];
-                player.IsImposter = i == imposterIndex;
-                player.Word = player.IsImposter ? string.Empty : word;
+                player.IsImposter = imposterIndices.Contains(i);
+                player.Word = player.IsImposter ? string.Empty : entry.Word;
                 player.HasViewedCard = false;
             }
+
+            IsGameInProgress = true;
+            OnGameStateChanged?.Invoke();
         }
 
         /// <summary>
-        /// Clears role assignments and round state while keeping the player roster.
+        /// Clears role assignments and round state while keeping the player roster and settings.
         /// </summary>
         public void ResetRound()
         {
             CurrentWord = string.Empty;
+            CurrentCategoryName = string.Empty;
+            CurrentCategoryIcon = string.Empty;
+            ActiveImposterCount = 0;
+            IsGameInProgress = false;
+
             foreach (var player in Players)
             {
                 player.IsImposter = false;
                 player.Word = string.Empty;
                 player.HasViewedCard = false;
             }
+
+            OnGameStateChanged?.Invoke();
         }
 
         public async Task LoadPlayersAsync()
@@ -76,8 +167,23 @@ namespace ImposterGame.Services
                             .Where(p => p is not null && !string.IsNullOrWhiteSpace(p.Name))
                             .ToList();
 
+                        var migrated = false;
+                        for (int i = 0; i < validPlayers.Count; i++)
+                        {
+                            if (!IsValidAvatarUri(validPlayers[i].Uri))
+                            {
+                                validPlayers[i].Uri = GetAvatarUri(validPlayers[i].Id > 0 ? validPlayers[i].Id : i + 1);
+                                migrated = true;
+                            }
+                        }
+
                         Players.Clear();
                         Players.AddRange(validPlayers);
+
+                        if (migrated)
+                        {
+                            await SavePlayersAsync();
+                        }
                     }
                 }
 
@@ -94,6 +200,82 @@ namespace ImposterGame.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"Error loading players: {ex.Message}");
+            }
+        }
+
+        public async Task LoadSettingsAsync()
+        {
+            if (_hasLoadedSettings)
+            {
+                return;
+            }
+
+            try
+            {
+                var json = await _jsRuntime.InvokeAsync<string?>("localStorage.getItem", SettingsStorageKey);
+                if (!string.IsNullOrEmpty(json))
+                {
+                    var stored = JsonSerializer.Deserialize<GameSettings>(json);
+                    if (stored is not null)
+                    {
+                        var validCategoryIds = new HashSet<string>(Categories.Select(c => c.Id), StringComparer.OrdinalIgnoreCase);
+                        stored.Difficulty = Enum.IsDefined(stored.Difficulty)
+                            ? stored.Difficulty
+                            : WordDifficulty.Medium;
+                        stored.SelectedCategoryIds = (stored.SelectedCategoryIds ?? new List<string>())
+                            .Where(id => validCategoryIds.Contains(id))
+                            .Distinct(StringComparer.OrdinalIgnoreCase)
+                            .ToList();
+                        stored.ImposterCount = Math.Clamp(stored.ImposterCount, 1, 2);
+                        stored.RoundDurationMinutes = Math.Clamp(stored.RoundDurationMinutes, MinRoundMinutes, MaxRoundMinutes);
+                        Settings = stored;
+                    }
+                }
+
+                _hasLoadedSettings = true;
+                OnSettingsChanged?.Invoke();
+            }
+            catch (InvalidOperationException)
+            {
+                // Prerendering: JS interop is not available yet.
+            }
+            catch (JSDisconnectedException)
+            {
+                // Circuit disconnected while reading storage.
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading settings: {ex.Message}");
+            }
+        }
+
+        public async Task SaveSettingsAsync()
+        {
+            if (!Enum.IsDefined(Settings.Difficulty))
+            {
+                Settings.Difficulty = WordDifficulty.Medium;
+            }
+
+            Settings.ImposterCount = Math.Clamp(Settings.ImposterCount, 1, 2);
+            Settings.RoundDurationMinutes = Math.Clamp(Settings.RoundDurationMinutes, MinRoundMinutes, MaxRoundMinutes);
+            OnSettingsChanged?.Invoke();
+
+            try
+            {
+                var json = JsonSerializer.Serialize(Settings);
+                await _jsRuntime.InvokeVoidAsync("localStorage.setItem", SettingsStorageKey, json);
+            }
+            catch (InvalidOperationException)
+            {
+                // Prerendering: JS interop is not available yet.
+            }
+            catch (JSDisconnectedException)
+            {
+                // Circuit disconnected while saving storage.
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error saving settings: {ex.Message}");
             }
         }
 
@@ -158,8 +340,13 @@ namespace ImposterGame.Services
         public List<Player> ListNewPlayers() => Players;
 
         /// <summary>
-        /// Returns the imposter player if assigned, otherwise null.
+        /// Returns the first imposter player if assigned, otherwise null.
         /// </summary>
         public Player? GetImposter() => Players.FirstOrDefault(p => p.IsImposter);
+
+        /// <summary>
+        /// Returns all assigned imposter players.
+        /// </summary>
+        public List<Player> GetImposters() => Players.Where(p => p.IsImposter).ToList();
     }
 }

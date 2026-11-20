@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <clipPath id="h19"><circle cx="64" cy="64" r="64"/></clipPath>
+  </defs>
+  <g clip-path="url(#h19)">
+    <circle cx="64" cy="64" r="64" fill="#EDE9FE"/>
+    <!-- Hijab Outer Drape -->
+    <path d="M22 132 C24 94 34 80 34 56 C34 32 48 22 64 22 C80 22 94 32 94 56 C94 80 104 94 106 132 Z" fill="#0D9488"/>
+    <path d="M26 132 C34 102 52 94 64 94 C78 94 94 102 102 132 Z" fill="#14B8A6"/>
+    <!-- Inner Scarf Cap -->
+    <ellipse cx="64" cy="58" rx="25" ry="28" fill="#0F766E"/>
+    <!-- Face -->
+    <ellipse cx="64" cy="62" rx="21" ry="23" fill="#F8CAA6"/>
+    <!-- Soft Fold Across Chin -->
+    <path d="M40 76 Q64 92 88 76 Q84 96 64 98 Q44 96 40 76 Z" fill="#0D9488"/>
+    <!-- Eyes & Eyebrows -->
+    <circle cx="55" cy="60" r="3.5" fill="#1E1B2E"/>
+    <circle cx="73" cy="60" r="3.5" fill="#1E1B2E"/>
+    <circle cx="54" cy="58.8" r="1.2" fill="#FFFFFF"/>
+    <circle cx="72" cy="58.8" r="1.2" fill="#FFFFFF"/>
+    <path d="M50 53 Q55 50 60 53" fill="none" stroke="#451A03" stroke-width="2" stroke-linecap="round"/>
+    <path d="M68 53 Q73 50 78 53" fill="none" stroke="#451A03" stroke-width="2" stroke-linecap="round"/>
+    <!-- Blush & Warm Smile -->
+    <ellipse cx="49" cy="67" rx="4.5" ry="2.6" fill="#FDA4AF" opacity="0.6"/>
+    <ellipse cx="79" cy="67" rx="4.5" ry="2.6" fill="#FDA4AF" opacity="0.6"/>
+    <path d="M57 72 Q64 78 71 72" fill="none" stroke="#B45368" stroke-width="2.6" stroke-linecap="round"/>
+  </g>
+</svg>

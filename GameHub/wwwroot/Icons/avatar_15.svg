@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <clipPath id="c35"><circle cx="64" cy="64" r="64"/></clipPath>
+  </defs>
+  <g clip-path="url(#c35)">
+    <circle cx="64" cy="64" r="64" fill="#CCFBF1"/>
+    <!-- Body -->
+    <path d="M26 132 C30 98 44 92 64 92 C84 92 98 98 102 132 Z" fill="#92400E"/>
+    <!-- Ears -->
+    <circle cx="38" cy="40" r="13" fill="#B45309"/>
+    <circle cx="38" cy="40" r="6.5" fill="#FDE68A"/>
+    <circle cx="90" cy="40" r="13" fill="#B45309"/>
+    <circle cx="90" cy="40" r="6.5" fill="#FDE68A"/>
+    <!-- Head -->
+    <ellipse cx="64" cy="66" rx="35" ry="31" fill="#B45309"/>
+    <!-- Snout -->
+    <ellipse cx="64" cy="74" rx="15" ry="11" fill="#FDE68A"/>
+    <!-- Eyes & Blush -->
+    <circle cx="50" cy="60" r="4.2" fill="#1E1B2E"/>
+    <circle cx="78" cy="60" r="4.2" fill="#1E1B2E"/>
+    <circle cx="48.8" cy="58.5" r="1.4" fill="#FFFFFF"/>
+    <circle cx="76.8" cy="58.5" r="1.4" fill="#FFFFFF"/>
+    <ellipse cx="40" cy="70" rx="5.5" ry="3" fill="#FDA4AF" opacity="0.65"/>
+    <ellipse cx="88" cy="70" rx="5.5" ry="3" fill="#FDA4AF" opacity="0.65"/>
+    <!-- Nose & Smile -->
+    <ellipse cx="64" cy="70" rx="5.5" ry="4" fill="#451A03"/>
+    <path d="M58 77 Q61 81 64 76 Q67 81 70 77" fill="none" stroke="#451A03" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+</svg>

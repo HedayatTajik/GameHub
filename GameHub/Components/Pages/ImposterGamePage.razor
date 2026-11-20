@@ -2,170 +2,180 @@
 @inherits ImposterGame.Pages.ImposterGamePage
 <PageTitle>بازی شیاد</PageTitle>
 
+<NavigationLock ConfirmExternalNavigation="@ShouldConfirmExit"
+                OnBeforeInternalNavigation="@HandleBeforeInternalNavigation" />
 
 @if (!gameStarted || CurrentPlayer is null)
 {
-    <RadzenCard Style="
-                width:100%;
-                max-width:520px;
-                margin:auto;
-                text-align:center;
-                border-radius:20px;
-                box-shadow:0 4px 12px rgba(0,0,0,0.1);
-                padding:20px;
-                background:#fff;
-                margin-top:5px;">
+    <div class="page-stack">
+        <!-- Quick Settings Summary Bar -->
+        <button type="button" class="settings-summary-bar" @onclick="OpenSettingsDialog">
+            <span class="settings-summary-text">@SettingsSummary</span>
+            <span class="settings-summary-cta">⚙️ تغییر</span>
+        </button>
 
-        <RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Stretch" Gap="7px">
+        <!-- Players Roster Card -->
+        <div class="game-card">
+            <div class="section-header-row">
+                <span class="section-title">👥 بازیکنان</span>
+                <span class="count-pill">@players.Count نفر</span>
+            </div>
 
-            <!-- Player List -->
-            @foreach (var player in players)
+            @if (players.Any(p => !string.IsNullOrEmpty(p.Name)))
             {
-                @if (!string.IsNullOrEmpty(player.Name))
-                {
-                    <RadzenStack Orientation="Orientation.Horizontal"
-                                 AlignItems="AlignItems.Center"
-                                 JustifyContent="JustifyContent.SpaceBetween"
-                                 Style="background:#f5f6fa; border-radius:12px; padding:10px 15px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+                <div class="player-list">
+                    @foreach (var player in players)
+                    {
+                        @if (!string.IsNullOrEmpty(player.Name))
+                        {
+                            <div class="player-row">
+                                <img src="@player.Uri" alt="@player.Name" class="player-avatar" />
+                                <span class="player-name">@player.Name</span>
+                                <button type="button"
+                                        class="player-remove-btn"
+                                        aria-label="@($"حذف {player.Name}")"
+                                        @onclick="() => RemovePlayer(player)">
+                                    ✕
+                                </button>
+                            </div>
+                        }
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="empty-players-box">
+                    هنوز بازیکنی اضافه نشده است.<br />
+                    نام و آواتار اولین بازیکن را در بخش پایین انتخاب کنید 👇
+                </div>
+            }
 
-                        <RadzenImage Path="@player.Uri"
-                                     AlternateText="@player.Name"
-                                     Style="width:2.8rem; height:2.8rem; border-radius:50%; object-fit:cover;" />
+            @if (players.Count >= ImposterGame.Services.GameService.MinPlayers)
+            {
+                <button type="button" class="success-action-btn" @onclick="AssignRoles">
+                    🎮 شروع بازی (@players.Count بازیکن)
+                </button>
+            }
+            else
+            {
+                var remaining = ImposterGame.Services.GameService.MinPlayers - players.Count;
+                var pct = (int)Math.Round(players.Count * 100.0 / ImposterGame.Services.GameService.MinPlayers);
+                <div class="min-players-progress">
+                    <span class="min-players-text">
+                        برای شروع بازی @remaining بازیکن دیگر اضافه کنید (@players.Count از @ImposterGame.Services.GameService.MinPlayers)
+                    </span>
+                    <div class="progress-track">
+                        <div class="progress-fill" style="@($"width:{pct}%;")"></div>
+                    </div>
+                </div>
+            }
+        </div>
 
-                        <RadzenText Text="@player.Name"
-                                    Style="
-                                        font-family:'Far_Morvarid';
-                                        font-size:1.6rem;
-                                        font-weight:400;
-                                        color:#222;
-                                        text-align:right;
-                                        flex:1;
-                                        margin-right:10px;" />
+        <!-- Add New Player Card -->
+        <div class="game-card">
+            <div class="section-title">➕ افزودن بازیکن جدید</div>
 
-                        <RadzenButton Icon="close"
-                                      Size="ButtonSize.Small"
-                                      Variant="Variant.Text"
-                                      ButtonStyle="ButtonStyle.Danger"
-                                      Click="() => RemovePlayer(player)"
-                                      Style="min-width:0; padding:4px;" />
-                    </RadzenStack>
-                }
+            <div class="add-player-row">
+                <RadzenTextBox Value="@newPlayer.Name"
+                               ValueChanged="@OnNameChanged"
+                               Immediate="true"
+                               @onkeydown="HandleKeyDown"
+                               Placeholder="نام بازیکن را بنویسید..."
+                               class="add-player-input" />
+
+                <button type="button"
+                        class="add-player-btn"
+                        aria-label="افزودن بازیکن"
+                        @onclick="AddPlayer">
+                    ＋
+                </button>
+            </div>
+
+            @if (!string.IsNullOrEmpty(validationMessage))
+            {
+                <div class="validation-text">@validationMessage</div>
             }
 
             <SelectAvatar AfterSelectAvatar="@selectedAvatar"
                           UsedAvatars="@players.Select(p => p.Uri)"
                           OnAvatarSelected="@HandleAvatarSelected" />
-
-            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="6px">
-
-                <RadzenTextBox Value="@newPlayer.Name"
-                               ValueChanged="@OnNameChanged"
-                               Immediate="true"
-                               @onkeydown="HandleKeyDown"
-                               Placeholder="نام بازیکن جدید"
-                               Style="flex:1; font-size:1.2rem;" />
-
-                <RadzenButton Text="➕"
-                              Click="@AddPlayer"
-                              Size="ButtonSize.Large"
-                              ButtonStyle="ButtonStyle.Primary"
-                              Style="border-radius:12px; font-size:1.5rem; font-weight:600; color:white !important; background-color:#4a90e2; border:none;" />
-
-                @if (players.Count >= ImposterGame.Services.GameService.MinPlayers)
-                {
-                    <RadzenButton Text="🎮"
-                                  Click="@AssignRoles"
-                                  Size="ButtonSize.Large"
-                                  ButtonStyle="ButtonStyle.Success"
-                                  Style="border-radius:12px; font-size:1.5rem; font-weight:600;" />
-                }
-            </RadzenStack>
-
-            @if (!string.IsNullOrEmpty(validationMessage))
-            {
-                <RadzenText Text="@validationMessage"
-                            Style="font-family:'Far_Morvarid'; font-size:1rem; color:#d32f2f; text-align:center; margin-top:4px;" />
-            }
-            else if (players.Count < ImposterGame.Services.GameService.MinPlayers)
-            {
-                <RadzenText Text="@($"حداقل {ImposterGame.Services.GameService.MinPlayers} بازیکن برای شروع بازی لازم است ({players.Count}/{ImposterGame.Services.GameService.MinPlayers})")"
-                            Style="font-family:'Far_Morvarid'; font-size:0.95rem; color:#666; text-align:center; margin-top:4px;" />
-            }
-        </RadzenStack>
-
-    </RadzenCard>
+        </div>
+    </div>
 }
 else
 {
-    <RadzenCard Style="
-                width:90%;
-                max-width:420px;
-                margin:auto;
-                text-align:center;
-                border-radius:20px;
-                box-shadow:0 4px 12px rgba(0,0,0,0.1);
-                padding:20px;
-                background:#fff;">
+    var revealPct = (int)Math.Round((currentIndex + 1) * 100.0 / Math.Max(1, GameService.Players.Count));
+    <div class="page-stack">
+        <div class="game-card reveal-card">
+            <div class="reveal-progress-wrap">
+                <span class="progress-pill">بازیکن @(currentIndex + 1) از @GameService.Players.Count</span>
+                <div class="progress-track">
+                    <div class="progress-fill" style="@($"width:{revealPct}%;")"></div>
+                </div>
+            </div>
 
-        <RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" Gap="15px">
+            <img src="@CurrentPlayer.Uri" alt="@CurrentPlayer.Name" class="reveal-avatar" />
 
-            <RadzenText Text="@($"بازیکن {currentIndex + 1} از {GameService.Players.Count}")"
-                        Style="font-family:'Far_Morvarid'; font-size:1rem; color:#666;" />
-
-            <RadzenImage Path="@CurrentPlayer.Uri"
-                         AlternateText="@CurrentPlayer.Name"
-                         Style="width:8rem; height:8rem; border-radius:50%; object-fit:cover; box-shadow:0 0 6px rgba(0,0,0,0.15);" />
-
-            <RadzenText Text="@CurrentPlayer.Name"
-                        Style="font-family:'Far_Morvarid'; font-size:1.6rem; font-weight:700; color:#222;" />
+            <div class="reveal-player-name">@CurrentPlayer.Name</div>
 
             @if (!CurrentPlayer.HasViewedCard)
             {
-                <RadzenButton Text="👀 دیدن کارت"
-                              Size="ButtonSize.Large"
-                              Click="@ShowCard"
-                              ButtonStyle="ButtonStyle.Warning"
-                              Style="width:100%; max-width:300px; border-radius:12px; font-weight:600; font-size:1.1rem;" />
+                <div class="mystery-card-back">
+                    <span class="mystery-card-icon">🔒</span>
+                    <span class="mystery-card-title">کارت مخفی آماده است</span>
+                    <span class="mystery-card-hint">
+                        مطمئن شوید فقط <strong>@CurrentPlayer.Name</strong> صفحه را می‌بیند
+                    </span>
+                </div>
+
+                <button type="button" class="primary-action-btn" @onclick="ShowCard">
+                    👀 نمایش کارت من
+                </button>
             }
             else
             {
-                <RadzenPanel Style="
-                                    width:100%;
-                                    max-width:320px;
-                                    background:#ffdd59;
-                                    border-radius:15px;
-                                    box-shadow:inset 0 0 5px rgba(0,0,0,0.1);
-                                    padding:20px;">
+                <div class="card-reveal-box @(CurrentPlayer.IsImposter ? "imposter" : "word")">
+                    @if (!CurrentPlayer.IsImposter && !string.IsNullOrEmpty(GameService.CurrentCategoryName))
+                    {
+                        <div class="reveal-category-tag">@GameService.CurrentCategoryIcon @GameService.CurrentCategoryName</div>
+                    }
 
-                    <RadzenText Text="@CardText"
-                                TextStyle="TextStyle.DisplayH4"
-                                Style="font-family:'Far_Morvarid'; font-size:1.8rem; font-weight:600; color:#222; text-align:center; margin-top:7px" />
-                </RadzenPanel>
+                    <div class="reveal-main-text">@CardText</div>
+
+                    @if (CurrentPlayer.IsImposter)
+                    {
+                        @if (Settings.ShowCategoryHintToImposter && !string.IsNullOrEmpty(GameService.CurrentCategoryName))
+                        {
+                            <div class="imposter-hint-badge">
+                                💡 دسته‌بندی: @GameService.CurrentCategoryIcon @GameService.CurrentCategoryName
+                            </div>
+                        }
+
+                        <div class="imposter-extra-note">
+                            @(GameService.ActiveImposterCount > 1
+                                ? $"در این دور {GameService.ActiveImposterCount} شیاد در بازی هستند — طبیعی رفتار کنید و کلمه را حدس بزنید!"
+                                : "طبیعی رفتار کنید و از روی سرنخ‌ها کلمه اصلی را حدس بزنید!")
+                        </div>
+                    }
+                </div>
 
                 @if (currentIndex >= GameService.Players.Count - 1)
                 {
-                    <RadzenButton Text="🎮 شروع بازی"
-                                  Size="ButtonSize.Large"
-                                  Click="@StartGame"
-                                  ButtonStyle="ButtonStyle.Success"
-                                  Style="width:100%; max-width:300px; border-radius:12px; font-weight:600; font-size:1.1rem;" />
+                    <button type="button" class="success-action-btn" @onclick="StartGame">
+                        🎮 شروع زمان بازی
+                    </button>
                 }
                 else
                 {
-                    <RadzenButton Text="➡️ نفر بعدی"
-                                  Size="ButtonSize.Large"
-                                  Click="@NextPlayer"
-                                  ButtonStyle="ButtonStyle.Info"
-                                  Style="width:100%; max-width:300px; border-radius:12px; font-weight:600; font-size:1.1rem;" />
+                    <button type="button" class="primary-action-btn" @onclick="NextPlayer">
+                        ➡️ مخفی کردن و نفر بعدی
+                    </button>
                 }
             }
 
-            <RadzenButton Text="بازگشت به لیست بازیکنان"
-                          Click="@CancelGame"
-                          Variant="Variant.Text"
-                          ButtonStyle="ButtonStyle.Secondary"
-                          Size="ButtonSize.Small"
-                          Style="font-family:'Far_Morvarid'; font-size:0.95rem;" />
-        </RadzenStack>
-    </RadzenCard>
+            <button type="button" class="ghost-action-btn" @onclick="CancelGame">
+                بازگشت به لیست بازیکنان
+            </button>
+        </div>
+    </div>
 }

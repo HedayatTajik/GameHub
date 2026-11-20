@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <clipPath id="h21"><circle cx="64" cy="64" r="64"/></clipPath>
+  </defs>
+  <g clip-path="url(#h21)">
+    <circle cx="64" cy="64" r="64" fill="#DCFCE7"/>
+    <!-- High Ponytail -->
+    <circle cx="86" cy="30" r="15" fill="#EA580C"/>
+    <circle cx="94" cy="40" r="11" fill="#D97706"/>
+    <circle cx="78" cy="34" r="6" fill="#10B981"/>
+    <!-- Hair Back -->
+    <circle cx="64" cy="54" r="27" fill="#EA580C"/>
+    <!-- Top -->
+    <path d="M22 132 C26 100 42 92 64 92 C86 92 102 100 106 132 Z" fill="#7C3AED"/>
+    <path d="M50 92 Q64 104 78 92" fill="#FDE2CC"/>
+    <!-- Neck & Ears -->
+    <rect x="56" y="80" width="16" height="14" rx="6" fill="#F6C8A6"/>
+    <circle cx="40" cy="65" r="6" fill="#FDE2CC"/>
+    <circle cx="88" cy="65" r="6" fill="#FDE2CC"/>
+    <!-- Face -->
+    <rect x="42" y="44" width="44" height="44" rx="22" fill="#FFE6D1"/>
+    <!-- Ginger Bangs -->
+    <path d="M40 56 C42 38 56 34 68 38 C80 41 86 47 88 56 C80 48 70 46 60 48 C50 50 45 52 40 56 Z" fill="#EA580C"/>
+    <!-- Eyes -->
+    <circle cx="53" cy="64" r="3.6" fill="#1E1B2E"/>
+    <circle cx="75" cy="64" r="3.6" fill="#1E1B2E"/>
+    <circle cx="52" cy="62.8" r="1.2" fill="#FFFFFF"/>
+    <circle cx="74" cy="62.8" r="1.2" fill="#FFFFFF"/>
+    <!-- Cute Freckles -->
+    <circle cx="48" cy="70" r="1.2" fill="#C2410C" opacity="0.6"/>
+    <circle cx="52" cy="71.5" r="1.2" fill="#C2410C" opacity="0.6"/>
+    <circle cx="76" cy="71.5" r="1.2" fill="#C2410C" opacity="0.6"/>
+    <circle cx="80" cy="70" r="1.2" fill="#C2410C" opacity="0.6"/>
+    <!-- Smile -->
+    <path d="M56 76 Q64 82 72 76" fill="none" stroke="#B45309" stroke-width="2.6" stroke-linecap="round"/>
+  </g>
+</svg>
+

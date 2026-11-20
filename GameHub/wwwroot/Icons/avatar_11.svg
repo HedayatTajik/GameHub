@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <clipPath id="c31"><circle cx="64" cy="64" r="64"/></clipPath>
+  </defs>
+  <g clip-path="url(#c31)">
+    <circle cx="64" cy="64" r="64" fill="#FEF9C3"/>
+    <!-- Body -->
+    <path d="M26 132 C30 98 44 92 64 92 C84 92 98 98 102 132 Z" fill="#22C55E"/>
+    <ellipse cx="64" cy="118" rx="22" ry="18" fill="#BBF7D0"/>
+    <!-- Top Eyes -->
+    <circle cx="44" cy="44" r="14" fill="#4ADE80"/>
+    <circle cx="84" cy="44" r="14" fill="#4ADE80"/>
+    <circle cx="44" cy="44" r="9" fill="#FFFFFF"/>
+    <circle cx="84" cy="44" r="9" fill="#FFFFFF"/>
+    <circle cx="45" cy="44" r="5" fill="#1E1B2E"/>
+    <circle cx="83" cy="44" r="5" fill="#1E1B2E"/>
+    <circle cx="43.5" cy="42" r="1.8" fill="#FFFFFF"/>
+    <circle cx="81.5" cy="42" r="1.8" fill="#FFFFFF"/>
+    <!-- Head -->
+    <ellipse cx="64" cy="70" rx="37" ry="27" fill="#4ADE80"/>
+    <!-- Blush -->
+    <ellipse cx="38" cy="72" rx="6.5" ry="3.8" fill="#FDA4AF" opacity="0.75"/>
+    <ellipse cx="90" cy="72" rx="6.5" ry="3.8" fill="#FDA4AF" opacity="0.75"/>
+    <!-- Big Happy Grin -->
+    <path d="M46 72 Q64 88 82 72" fill="none" stroke="#14532D" stroke-width="3.2" stroke-linecap="round"/>
+  </g>
+</svg>

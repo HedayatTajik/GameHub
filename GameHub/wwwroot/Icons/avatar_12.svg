@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <clipPath id="c32"><circle cx="64" cy="64" r="64"/></clipPath>
+  </defs>
+  <g clip-path="url(#c32)">
+    <circle cx="64" cy="64" r="64" fill="#FCE7F3"/>
+    <!-- Antennae -->
+    <path d="M48 40 Q38 24 34 22" fill="none" stroke="#10B981" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="33" cy="21" r="6.5" fill="#34D399"/>
+    <path d="M80 40 Q90 24 94 22" fill="none" stroke="#10B981" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="95" cy="21" r="6.5" fill="#34D399"/>
+    <!-- Suit -->
+    <path d="M26 132 C30 100 44 94 64 94 C84 94 98 100 102 132 Z" fill="#6366F1"/>
+    <ellipse cx="64" cy="96" rx="18" ry="6" fill="#A5B4FC"/>
+    <!-- Head -->
+    <ellipse cx="64" cy="64" rx="34" ry="31" fill="#34D399"/>
+    <!-- Big Cute Eyes -->
+    <ellipse cx="49" cy="62" rx="9" ry="11" fill="#0F172A"/>
+    <ellipse cx="79" cy="62" rx="9" ry="11" fill="#0F172A"/>
+    <circle cx="46.5" cy="58" r="3" fill="#FFFFFF"/>
+    <circle cx="76.5" cy="58" r="3" fill="#FFFFFF"/>
+    <circle cx="51" cy="65" r="1.5" fill="#FFFFFF"/>
+    <circle cx="81" cy="65" r="1.5" fill="#FFFFFF"/>
+    <!-- Cute Smile -->
+    <path d="M55 78 Q64 85 73 78" fill="none" stroke="#065F46" stroke-width="2.8" stroke-linecap="round"/>
+  </g>
+</svg>

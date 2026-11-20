@@ -2,113 +2,99 @@
 @inherits ImposterGame.Pages.Timer
 <PageTitle>زمان بازی</PageTitle>
 
-<RadzenCard Style="
-    width:90%;
-    max-width:420px;
-    margin:auto;
-    margin-top:40px;
-    text-align:center;
-    border-radius:20px;
-    box-shadow:0 4px 12px rgba(0,0,0,0.1);
-    padding:25px;
-    background:linear-gradient(180deg,#fff,#f9f9f9);">
+<NavigationLock ConfirmExternalNavigation="@ShouldConfirmExit"
+                OnBeforeInternalNavigation="@HandleBeforeInternalNavigation" />
 
-    <RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" Gap="20px">
-
+<div class="page-stack">
+    <div class="game-card timer-card">
         @if (!string.IsNullOrEmpty(PersonStart))
         {
-            <RadzenText Text="@(PersonStart + " شروع می‌کند")"
-                        TextStyle="TextStyle.DisplayH6"
-                        Style="
-                            font-family:'Far_Morvarid';
-                            font-size:1.5rem;
-                            font-weight:700;
-                            color:#127;
-                            text-align:center;" />
+            <div class="starter-badge">🎤 @PersonStart شروع می‌کند</div>
         }
 
-        <RadzenText Text="@formattedTime"
-                    TextStyle="TextStyle.DisplayH2"
-                    Style="@($"font-family:'Far_Morvarid'; font-size:3rem; font-weight:700; color:{(IsTimeUp ? "#d32f2f" : "#222")}; text-align:center;")" />
+        @if (Imposters.Count > 1)
+        {
+            <div class="multi-imposter-badge">🕵️ @Imposters.Count شیاد در این دور حضور دارند</div>
+        }
+
+        <!-- Circular Countdown Ring -->
+        <div class="timer-ring-wrap @(IsTimeUp ? "time-up" : string.Empty)">
+            <svg class="timer-ring-svg" viewBox="0 0 210 210" aria-hidden="true">
+                <circle class="timer-ring-bg" cx="105" cy="105" r="92" />
+                <circle class="timer-ring-progress @TimerRingStateClass"
+                        cx="105"
+                        cy="105"
+                        r="92"
+                        stroke-dasharray="@RingCircumferenceCss"
+                        stroke-dashoffset="@RingDashOffsetCss" />
+            </svg>
+            <div class="timer-ring-center">
+                <div class="timer-display @(IsTimeUp ? "time-up" : string.Empty)">@formattedTime</div>
+                <div class="timer-status-label">@TimerStatusLabel</div>
+            </div>
+        </div>
 
         @if (IsTimeUp)
         {
-            <RadzenText Text="⏰ زمان تمام شد! وقت رای‌گیری است"
-                        Style="font-family:'Far_Morvarid'; font-size:1.3rem; font-weight:700; color:#d32f2f; text-align:center;" />
-        }
-        else
-        {
-            <RadzenButton Text="@(isPaused ? "▶️ ادامه زمان" : "⏸️ توقف زمان")"
-                          Click="@TogglePause"
-                          Variant="Variant.Outlined"
-                          Size="ButtonSize.Medium"
-                          ButtonStyle="ButtonStyle.Secondary"
-                          Style="
-                              width:100%;
-                              max-width:300px;
-                              border-radius:12px;
-                              font-family:'Far_Morvarid';
-                              font-size:1.1rem;
-                              font-weight:600;" />
+            <div class="time-up-banner">⏰ زمان تمام شد! حالا وقت رای‌گیری است</div>
         }
 
-        @if (Imposter is not null)
-        {
-            @if (!showResult)
+        <div class="action-stack">
+            @if (!IsTimeUp && !showResult)
             {
-                <RadzenButton Text="🎭 نمایش شیاد و کلمه"
-                              Click="@RevealResult"
-                              Variant="Variant.Outlined"
-                              Size="ButtonSize.Large"
-                              ButtonStyle="ButtonStyle.Warning"
-                              Style="
-                                  width:100%;
-                                  max-width:300px;
-                                  border-radius:12px;
-                                  font-family:'Far_Morvarid';
-                                  font-size:1.15rem;
-                                  font-weight:600;" />
+                <div class="two-col-actions">
+                    <button type="button" class="secondary-action-btn" @onclick="TogglePause">
+                        @(isPaused ? "▶️ ادامه" : "⏸️ توقف")
+                    </button>
+
+                    @if (Imposters.Count > 0)
+                    {
+                        <button type="button" class="soft-action-btn" @onclick="RevealResult">
+                            🎭 نمایش نتیجه
+                        </button>
+                    }
+                </div>
             }
-            else
+            else if (Imposters.Count > 0 && !showResult)
             {
-                <RadzenPanel Style="
-                    width:100%;
-                    max-width:320px;
-                    background:#fff3cd;
-                    border-radius:15px;
-                    box-shadow:inset 0 0 5px rgba(0,0,0,0.1);
-                    padding:16px;">
-
-                    <RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" Gap="8px">
-                        @if (!string.IsNullOrEmpty(Imposter.Uri))
-                        {
-                            <RadzenImage Path="@Imposter.Uri"
-                                         AlternateText="@Imposter.Name"
-                                         Style="width:4.5rem; height:4.5rem; border-radius:50%; object-fit:cover;" />
-                        }
-                        <RadzenText Text="@($"شیاد: {Imposter.Name}")"
-                                    Style="font-family:'Far_Morvarid'; font-size:1.4rem; font-weight:700; color:#b71c1c; text-align:center;" />
-                        @if (!string.IsNullOrEmpty(SecretWord))
-                        {
-                            <RadzenText Text="@($"کلمه: {SecretWord}")"
-                                        Style="font-family:'Far_Morvarid'; font-size:1.4rem; font-weight:600; color:#222; text-align:center;" />
-                        }
-                    </RadzenStack>
-                </RadzenPanel>
+                <button type="button" class="coral-action-btn" @onclick="RevealResult">
+                    @(Imposters.Count > 1 ? "🎭 نمایش شیادها و کلمه" : "🎭 نمایش شیاد و کلمه")
+                </button>
             }
-        }
 
-        <RadzenButton Text="🔁 شروع مجدد بازی"
-                      Click="@StartAgain"
-                      Size="ButtonSize.Large"
-                      ButtonStyle="ButtonStyle.Primary"
-                      Style="
-                          width:100%;
-                          max-width:300px;
-                          border-radius:12px;
-                          font-family:'Far_Morvarid';
-                          font-size:1.2rem;
-                          font-weight:600;" />
-    </RadzenStack>
+            @if (Imposters.Count > 0 && showResult)
+            {
+                <div class="result-reveal-box">
+                    <span class="result-label">@(Imposters.Count > 1 ? "🕵️ شیادهای این دور" : "🕵️ شیاد این دور")</span>
 
-</RadzenCard>
+                    <div class="result-imposters-grid">
+                        @foreach (var imposter in Imposters)
+                        {
+                            <div class="result-imposter-item">
+                                @if (!string.IsNullOrEmpty(imposter.Uri))
+                                {
+                                    <img src="@imposter.Uri" alt="@imposter.Name" />
+                                }
+                                <span class="result-imposter-name">@imposter.Name</span>
+                            </div>
+                        }
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(SecretWord))
+                    {
+                        <div class="result-word-pill">کلمه مخفی: @SecretWord</div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(SecretCategoryName))
+                    {
+                        <div class="result-category">@SecretCategoryIcon @SecretCategoryName • @SecretDifficultyLabel</div>
+                    }
+                </div>
+            }
+
+            <button type="button" class="primary-action-btn" @onclick="StartAgain">
+                🔁 دور جدید بازی
+            </button>
+        </div>
+    </div>
+</div>

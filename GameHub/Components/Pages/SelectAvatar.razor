@@ -1,24 +1,16 @@
 @inherits ImposterGame.Pages.SelectAvatar
-<RadzenStack Orientation="Orientation.Horizontal"
-             AlignItems="AlignItems.Center"
-             JustifyContent="JustifyContent.Center"
-             Wrap="FlexWrap.Wrap"
-             Gap="6px"
-             Style="
-                 max-width:100vw;
-                 margin-top:5px;
-                 max-height:40vh;
-                 overflow-y:auto;
-                 padding:6px 2px;">
 
-    @foreach (var avatar in Avatars)
-    {
-        <RadzenCard Style="@GetAvatarStyle(avatar)"
+<div>
+    <div class="avatar-picker-label">انتخاب آواتار:</div>
+    <div class="avatar-grid">
+        @foreach (var avatar in Avatars)
+        {
+            <button type="button"
+                    class="@GetAvatarCssClass(avatar)"
+                    aria-label="انتخاب آواتار"
                     @onclick="() => SelectAvatarFunc(avatar)">
-
-            <RadzenImage Path="@avatar"
-                         AlternateText="آواتار"
-                         Style="width:100%; height:100%; object-fit:cover;" />
-        </RadzenCard>
-    }
-</RadzenStack>
+                <img src="@avatar" alt="آواتار" loading="lazy" />
+            </button>
+        }
+    </div>
+</div>

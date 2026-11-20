@@ -1,39 +1,131 @@
-<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="/">بازی</a>
-        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-    </div>
-</div>
+@implements IDisposable
+@inject DialogService DialogService
+@inject ImposterGame.Services.GameService GameService
+@inject NavigationManager NavigationManager
 
-<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
-    <nav class="nav flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span>  خانه
-            </NavLink>
+<header class="app-topbar">
+    <div class="topbar-inner">
+        <div class="topbar-start">
+            <button type="button"
+                    class="icon-btn mobile-only"
+                    aria-label="منو"
+                    aria-expanded="@(!collapseNavMenu)"
+                    @onclick="ToggleNavMenu">
+                @(collapseNavMenu ? "☰" : "✕")
+            </button>
+
+            <a class="brand-link" href="/" @onclick="CloseNavMenu">
+                <span class="brand-icon">🎭</span>
+                <span class="brand-title">بازی شیاد</span>
+            </a>
         </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="impostergame">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> بازی شیاد
-            </NavLink>
+
+        <nav class="desktop-nav" aria-label="منوی اصلی">
+            <NavLink class="desktop-nav-link" href="" Match="NavLinkMatch.All">خانه</NavLink>
+            <NavLink class="desktop-nav-link" href="impostergame">بازی شیاد</NavLink>
+            <NavLink class="desktop-nav-link" href="aboutgame">درباره بازی</NavLink>
+        </nav>
+
+        <div class="topbar-end">
+            @if (ShowSettingsButton)
+            {
+                <button type="button"
+                        class="settings-trigger-btn"
+                        aria-label="تنظیمات بازی"
+                        title="تنظیمات بازی"
+                        @onclick="OpenSettingsDialog">
+                    <span class="settings-icon">⚙️</span>
+                    <span class="settings-label">تنظیمات</span>
+                </button>
+            }
         </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="aboutgame">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> درباره بازی
-            </NavLink>
-        </div>
+    </div>
+</header>
+
+@if (!collapseNavMenu)
+{
+    <div class="mobile-nav-backdrop" @onclick="CloseNavMenu"></div>
+    <nav class="mobile-nav-drawer" aria-label="منوی موبایل">
+        <NavLink class="mobile-nav-link" href="" Match="NavLinkMatch.All" @onclick="CloseNavMenu">
+            <span>🏠</span>
+            <span>خانه</span>
+        </NavLink>
+        <NavLink class="mobile-nav-link" href="impostergame" @onclick="CloseNavMenu">
+            <span>🎭</span>
+            <span>بازی شیاد</span>
+        </NavLink>
+        <NavLink class="mobile-nav-link" href="aboutgame" @onclick="CloseNavMenu">
+            <span>📖</span>
+            <span>درباره بازی</span>
+        </NavLink>
+        @if (ShowSettingsButton)
+        {
+            <button type="button" class="mobile-nav-link mobile-nav-action" @onclick="OpenSettingsFromMenu">
+                <span>⚙️</span>
+                <span>تنظیمات بازی</span>
+            </button>
+        }
     </nav>
-</div>
+}
 
 @code {
     private bool collapseNavMenu = true;
 
-    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+    private bool IsTimerRoute
+    {
+        get
+        {
+            var relative = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+            var path = relative.Split('?', '#')[0].Trim('/');
+            return path.Equals("timer", StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
+    private bool ShowSettingsButton => !GameService.IsGameInProgress && !IsTimerRoute;
+
+    protected override void OnInitialized()
+    {
+        GameService.OnGameStateChanged += HandleStateChanged;
+        NavigationManager.LocationChanged += HandleLocationChanged;
+    }
+
+    private void HandleStateChanged()
+    {
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    private void HandleLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+    {
+        collapseNavMenu = true;
+        _ = InvokeAsync(StateHasChanged);
+    }
 
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
+    }
+
+    private void CloseNavMenu()
+    {
+        collapseNavMenu = true;
+    }
+
+    private async Task OpenSettingsFromMenu()
+    {
+        collapseNavMenu = true;
+        await OpenSettingsDialog();
+    }
+
+    private async Task OpenSettingsDialog()
+    {
+        await DialogService.OpenAsync<GameHub.Components.Pages.GameSettingsDialog>(
+            "⚙️ تنظیمات بازی",
+            options: ImposterGame.Pages.GameSettingsDialog.CreateDialogOptions());
+    }
+
+    public void Dispose()
+    {
+        GameService.OnGameStateChanged -= HandleStateChanged;
+        NavigationManager.LocationChanged -= HandleLocationChanged;
     }
 }

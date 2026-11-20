@@ -1,7 +1,9 @@
-
 using ImposterGame.Models;
 using ImposterGame.Services;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Routing;
+using Radzen;
+using System.Globalization;
 
 namespace ImposterGame.Pages
 {
@@ -13,22 +15,57 @@ namespace ImposterGame.Pages
 
         [Inject] public GameService GameService { get; set; } = default!;
         [Inject] private NavigationManager NavigationManager { get; set; } = default!;
+        [Inject] private DialogService DialogService { get; set; } = default!;
 
         private CancellationTokenSource? _timerCts;
         private bool _disposed;
+        private bool _isExitConfirmed;
+        private bool _isConfirmDialogOpen;
 
         public List<Player> PlayerList { get; set; } = new();
         public string PersonStart { get; set; } = string.Empty;
-        public Player? Imposter { get; private set; }
+        public List<Player> Imposters { get; private set; } = new();
         public string SecretWord { get; private set; } = string.Empty;
+        public string SecretCategoryName { get; private set; } = string.Empty;
+        public string SecretCategoryIcon { get; private set; } = string.Empty;
+        public string SecretDifficultyLabel { get; private set; } = string.Empty;
 
         public int timeLeft = 180;
+        public int totalDurationSeconds = 180;
         public bool isRunning = false;
         public bool isPaused = false;
         public bool showResult = false;
 
+        private const double RingRadius = 92;
+        public static readonly double RingCircumference = 2 * Math.PI * RingRadius;
+
         public bool IsTimeUp => timeLeft <= 0;
+        protected bool ShouldConfirmExit => GameService.IsGameInProgress && !showResult && !_isExitConfirmed;
         public string formattedTime => $"{Math.Max(0, timeLeft) / 60:D2}:{Math.Max(0, timeLeft) % 60:D2}";
+
+        public string RingCircumferenceCss => RingCircumference.ToString("F2", CultureInfo.InvariantCulture);
+
+        public string RingDashOffsetCss
+        {
+            get
+            {
+                var ratio = totalDurationSeconds > 0
+                    ? Math.Clamp((double)timeLeft / totalDurationSeconds, 0.0, 1.0)
+                    : 0.0;
+                var offset = RingCircumference * (1.0 - ratio);
+                return offset.ToString("F2", CultureInfo.InvariantCulture);
+            }
+        }
+
+        public string TimerRingStateClass =>
+            timeLeft <= 10 ? "danger" :
+            timeLeft <= 30 ? "warning" :
+            "calm";
+
+        public string TimerStatusLabel =>
+            IsTimeUp ? "پایان زمان" :
+            isPaused ? "متوقف شده" :
+            "در حال گفتگو";
 
         protected override void OnInitialized()
         {
@@ -45,6 +82,7 @@ namespace ImposterGame.Pages
             if (GameService.Players.Count == 0)
             {
                 await GameService.LoadPlayersAsync();
+                await GameService.LoadSettingsAsync();
                 InitializeStateFromService();
             }
 
@@ -61,14 +99,26 @@ namespace ImposterGame.Pages
         private void InitializeStateFromService()
         {
             PlayerList = GameService.ListNewPlayers();
-            Imposter = GameService.GetImposter();
+            Imposters = GameService.GetImposters();
             SecretWord = GameService.CurrentWord;
+            SecretCategoryName = GameService.CurrentCategoryName;
+            SecretCategoryIcon = GameService.CurrentCategoryIcon;
+            SecretDifficultyLabel = GameService.GetDifficultyLabel(GameService.CurrentDifficulty);
 
-            int effectiveCount = PlayerCount > 0
-                ? PlayerCount
-                : (PlayerList.Count > 0 ? PlayerList.Count : GameService.MinPlayers);
+            if (GameService.HasActiveGame)
+            {
+                timeLeft = GameService.GetRoundDurationSeconds();
+            }
+            else if (PlayerCount > 0)
+            {
+                timeLeft = 60 * PlayerCount;
+            }
+            else
+            {
+                timeLeft = GameService.GetRoundDurationSeconds();
+            }
 
-            timeLeft = 60 * Math.Max(1, effectiveCount);
+            totalDurationSeconds = Math.Max(1, timeLeft);
 
             if (PlayerList.Count > 0 && string.IsNullOrEmpty(PersonStart))
             {
@@ -130,17 +180,117 @@ namespace ImposterGame.Pages
             }
         }
 
-        public void RevealResult()
+        public async Task RevealResult()
         {
+            if (!IsTimeUp)
+            {
+                var confirmed = await ConfirmActionAsync(
+                    "زمان بازی هنوز تمام نشده است. آیا می‌خواهید شیاد و کلمه نمایش داده شود؟",
+                    "🎭 نمایش نتیجه",
+                    "بله، نمایش بده",
+                    "ادامه بازی");
+
+                if (!confirmed)
+                {
+                    return;
+                }
+            }
+
             showResult = true;
             isPaused = true;
         }
 
-        public void StartAgain()
+        public async Task StartAgain()
         {
+            if (ShouldConfirmExit)
+            {
+                var confirmed = await ConfirmActionAsync(
+                    "بازی هنوز در حال اجراست. آیا مطمئن هستید که می‌خواهید بازی را متوقف کنید؟",
+                    "⚠️ پایان بازی",
+                    "بله، شروع مجدد",
+                    "ادامه بازی");
+
+                if (!confirmed)
+                {
+                    return;
+                }
+            }
+
+            _isExitConfirmed = true;
             _timerCts?.Cancel();
             GameService.ResetRound();
             NavigationManager.NavigateTo("/impostergame");
+        }
+
+        protected async Task HandleBeforeInternalNavigation(LocationChangingContext context)
+        {
+            if (!ShouldConfirmExit)
+            {
+                return;
+            }
+
+            if (_isConfirmDialogOpen)
+            {
+                context.PreventNavigation();
+                return;
+            }
+
+            var confirmed = await ConfirmActionAsync(
+                "بازی در حال اجراست. آیا مطمئن هستید که می‌خواهید از بازی خارج شوید؟",
+                "⚠️ خروج از بازی",
+                "بله، خروج از بازی",
+                "ادامه بازی");
+
+            if (!confirmed)
+            {
+                context.PreventNavigation();
+                return;
+            }
+
+            _isExitConfirmed = true;
+            _timerCts?.Cancel();
+            GameService.ResetRound();
+        }
+
+        private async Task<bool> ConfirmActionAsync(string message, string title, string okText, string cancelText)
+        {
+            if (_isConfirmDialogOpen)
+            {
+                return false;
+            }
+
+            _isConfirmDialogOpen = true;
+            var wasPaused = isPaused;
+            isPaused = true;
+
+            try
+            {
+                var result = await DialogService.Confirm(
+                    message,
+                    title,
+                    new ConfirmOptions
+                    {
+                        OkButtonText = okText,
+                        CancelButtonText = cancelText,
+                        CloseDialogOnOverlayClick = true,
+                        ShowClose = false,
+                        Draggable = false,
+                        Width = "min(92vw, 380px)",
+                        CssClass = "mobile-confirm-dialog"
+                    });
+
+                if (result == true)
+                {
+                    return true;
+                }
+
+                isPaused = wasPaused;
+                return false;
+            }
+            finally
+            {
+                _isConfirmDialogOpen = false;
+            }
         }
 
         public void Dispose()

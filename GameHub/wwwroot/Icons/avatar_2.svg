@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <clipPath id="c22"><circle cx="64" cy="64" r="64"/></clipPath>
+  </defs>
+  <g clip-path="url(#c22)">
+    <circle cx="64" cy="64" r="64" fill="#D1FAE5"/>
+    <!-- Ears -->
+    <polygon points="32,54 26,20 54,36" fill="#F97316"/>
+    <polygon points="35,48 31,27 49,38" fill="#FED7AA"/>
+    <polygon points="96,54 102,20 74,36" fill="#F97316"/>
+    <polygon points="93,48 97,27 79,38" fill="#FED7AA"/>
+    <!-- Body -->
+    <path d="M26 130 C30 98 44 92 64 92 C84 92 98 98 102 130 Z" fill="#EA580C"/>
+    <path d="M46 95 Q64 114 82 95 L76 130 L52 130 Z" fill="#FFF7ED"/>
+    <!-- Head -->
+    <ellipse cx="64" cy="66" rx="36" ry="30" fill="#F97316"/>
+    <!-- Cream Cheeks -->
+    <path d="M28 66 C34 86 50 96 64 96 C78 96 94 86 100 66 C88 68 78 72 64 78 C50 72 40 68 28 66 Z" fill="#FFF7ED"/>
+    <!-- Eyes & Blush -->
+    <circle cx="50" cy="62" r="4.5" fill="#1E1B2E"/>
+    <circle cx="78" cy="62" r="4.5" fill="#1E1B2E"/>
+    <circle cx="48.5" cy="60.5" r="1.5" fill="#FFFFFF"/>
+    <circle cx="76.5" cy="60.5" r="1.5" fill="#FFFFFF"/>
+    <ellipse cx="42" cy="72" rx="5.5" ry="3" fill="#FDA4AF" opacity="0.65"/>
+    <ellipse cx="86" cy="72" rx="5.5" ry="3" fill="#FDA4AF" opacity="0.65"/>
+    <!-- Nose & Smile -->
+    <ellipse cx="64" cy="74" rx="5" ry="3.8" fill="#1E1B2E"/>
+    <path d="M58 81 Q64 86 70 81" fill="none" stroke="#1E1B2E" stroke-width="2.6" stroke-linecap="round"/>
+  </g>
+</svg>
