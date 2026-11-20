@@ -1,9 +1,9 @@
-﻿@page "/impostergame"
+@page "/impostergame"
 @inherits ImposterGame.Pages.ImposterGamePage
-<PageTitle>Imposter</PageTitle>
+<PageTitle>بازی شیاد</PageTitle>
 
 
-@if (!gameStarted)
+@if (!gameStarted || CurrentPlayer is null)
 {
     <RadzenCard Style="
                 width:100%;
@@ -16,7 +16,6 @@
                 background:#fff;
                 margin-top:5px;">
 
-            
         <RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Stretch" Gap="7px">
 
             <!-- Player List -->
@@ -30,17 +29,18 @@
                                  Style="background:#f5f6fa; border-radius:12px; padding:10px 15px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
 
                         <RadzenImage Path="@player.Uri"
-                                     Style="width:2.8rem; height:2.5rem; border-radius:50%; object-fit:cover;" />
+                                     AlternateText="@player.Name"
+                                     Style="width:2.8rem; height:2.8rem; border-radius:50%; object-fit:cover;" />
 
                         <RadzenText Text="@player.Name"
                                     Style="
-                                                                font-family:'Far_Morvarid';
-                                                                font-size:1.6rem;
-                                                                font-weight:400;
-                                                                color:#222;
-                                                                text-align:right;
-                                                                flex:1;
-                                                                margin-right:10px;" />
+                                        font-family:'Far_Morvarid';
+                                        font-size:1.6rem;
+                                        font-weight:400;
+                                        color:#222;
+                                        text-align:right;
+                                        flex:1;
+                                        margin-right:10px;" />
 
                         <RadzenButton Icon="close"
                                       Size="ButtonSize.Small"
@@ -52,11 +52,16 @@
                 }
             }
 
-            <SelectAvatar AfterSelectAvatar="@selectedAvatar" OnAvatarSelected="@HandleAvatarSelected" />
+            <SelectAvatar AfterSelectAvatar="@selectedAvatar"
+                          UsedAvatars="@players.Select(p => p.Uri)"
+                          OnAvatarSelected="@HandleAvatarSelected" />
 
-            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="2px">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="6px">
 
-                <RadzenTextBox @bind-Value="newPlayer.Name"
+                <RadzenTextBox Value="@newPlayer.Name"
+                               ValueChanged="@OnNameChanged"
+                               Immediate="true"
+                               @onkeydown="HandleKeyDown"
                                Placeholder="نام بازیکن جدید"
                                Style="flex:1; font-size:1.2rem;" />
 
@@ -66,7 +71,7 @@
                               ButtonStyle="ButtonStyle.Primary"
                               Style="border-radius:12px; font-size:1.5rem; font-weight:600; color:white !important; background-color:#4a90e2; border:none;" />
 
-                @if (players.Count >= 3)
+                @if (players.Count >= ImposterGame.Services.GameService.MinPlayers)
                 {
                     <RadzenButton Text="🎮"
                                   Click="@AssignRoles"
@@ -75,6 +80,17 @@
                                   Style="border-radius:12px; font-size:1.5rem; font-weight:600;" />
                 }
             </RadzenStack>
+
+            @if (!string.IsNullOrEmpty(validationMessage))
+            {
+                <RadzenText Text="@validationMessage"
+                            Style="font-family:'Far_Morvarid'; font-size:1rem; color:#d32f2f; text-align:center; margin-top:4px;" />
+            }
+            else if (players.Count < ImposterGame.Services.GameService.MinPlayers)
+            {
+                <RadzenText Text="@($"حداقل {ImposterGame.Services.GameService.MinPlayers} بازیکن برای شروع بازی لازم است ({players.Count}/{ImposterGame.Services.GameService.MinPlayers})")"
+                            Style="font-family:'Far_Morvarid'; font-size:0.95rem; color:#666; text-align:center; margin-top:4px;" />
+            }
         </RadzenStack>
 
     </RadzenCard>
@@ -93,7 +109,11 @@ else
 
         <RadzenStack Orientation="Orientation.Vertical" AlignItems="AlignItems.Center" Gap="15px">
 
+            <RadzenText Text="@($"بازیکن {currentIndex + 1} از {GameService.Players.Count}")"
+                        Style="font-family:'Far_Morvarid'; font-size:1rem; color:#666;" />
+
             <RadzenImage Path="@CurrentPlayer.Uri"
+                         AlternateText="@CurrentPlayer.Name"
                          Style="width:8rem; height:8rem; border-radius:50%; object-fit:cover; box-shadow:0 0 6px rgba(0,0,0,0.15);" />
 
             <RadzenText Text="@CurrentPlayer.Name"
@@ -139,6 +159,13 @@ else
                                   Style="width:100%; max-width:300px; border-radius:12px; font-weight:600; font-size:1.1rem;" />
                 }
             }
+
+            <RadzenButton Text="بازگشت به لیست بازیکنان"
+                          Click="@CancelGame"
+                          Variant="Variant.Text"
+                          ButtonStyle="ButtonStyle.Secondary"
+                          Size="ButtonSize.Small"
+                          Style="font-family:'Far_Morvarid'; font-size:0.95rem;" />
         </RadzenStack>
     </RadzenCard>
 }
