@@ -1,15 +1,16 @@
 @inherits ImposterGame.Pages.SelectAvatar
+@inject ImposterGame.Services.LocalizationService L
 
 <div>
-    <div class="avatar-picker-label">انتخاب آواتار:</div>
+    <div class="avatar-picker-label">@L.SelectAvatarLabel</div>
     <div class="avatar-grid">
         @foreach (var avatar in Avatars)
         {
             <button type="button"
                     class="@GetAvatarCssClass(avatar)"
-                    aria-label="انتخاب آواتار"
+                    aria-label="@L.SelectAvatarAria"
                     @onclick="() => SelectAvatarFunc(avatar)">
-                <img src="@avatar" alt="آواتار" loading="lazy" />
+                <img src="@avatar" alt="@L.SelectAvatarAria" loading="lazy" />
             </button>
         }
     </div>

@@ -8,21 +8,16 @@ namespace ImposterGame.Pages
     public partial class GameSettingsDialog : ComponentBase
     {
         [Inject] public GameService GameService { get; set; } = default!;
+        [Inject] public LocalizationService L { get; set; } = default!;
+        [Inject] private AudioHapticService AudioHaptic { get; set; } = default!;
         [Inject] private DialogService DialogService { get; set; } = default!;
 
+        protected bool CanInstallPwa { get; private set; }
         protected GameSettings Settings => GameService.Settings;
         protected IReadOnlyList<WordCategory> Categories => GameService.Categories;
         protected bool CanUseTwoImposters => GameService.Players.Count >= GameService.MinPlayersForTwoImposters;
         protected int EffectiveImposterCount => GameService.GetEffectiveImposterCount();
         protected int ActiveWordCount => GameService.GetActiveWordPoolCount();
-
-        protected string DifficultyDescription => Settings.Difficulty switch
-        {
-            WordDifficulty.Easy => "فقط کلمات ساده و روزمره — مناسب برای همه",
-            WordDifficulty.Medium => "فقط کلمات متعادل و متنوع — چالش استاندارد",
-            WordDifficulty.Hard => "فقط کلمات بسیار سخت، تخصصی و مفهومی — برای حرفه‌ای‌ها!",
-            _ => string.Empty
-        };
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
@@ -30,7 +25,31 @@ namespace ImposterGame.Pages
             {
                 await GameService.LoadPlayersAsync();
                 await GameService.LoadSettingsAsync();
+                CanInstallPwa = await AudioHaptic.CanInstallPwaAsync();
                 StateHasChanged();
+            }
+        }
+
+        protected async Task SetLanguage(string language)
+        {
+            Settings.Language = language;
+            await GameService.SaveSettingsAsync();
+            await AudioHaptic.PlayClickAsync(Settings.SoundEnabled);
+        }
+
+        protected async Task OnDarkModeChanged(bool value)
+        {
+            Settings.DarkMode = value;
+            await GameService.SaveSettingsAsync();
+        }
+
+        protected async Task OnSoundChanged(bool value)
+        {
+            Settings.SoundEnabled = value;
+            await GameService.SaveSettingsAsync();
+            if (value)
+            {
+                await AudioHaptic.PlayClickAsync(true);
             }
         }
 
@@ -38,6 +57,7 @@ namespace ImposterGame.Pages
         {
             Settings.Difficulty = difficulty;
             await GameService.SaveSettingsAsync();
+            await AudioHaptic.PlayClickAsync(Settings.SoundEnabled);
         }
 
         protected bool IsCategorySelected(string categoryId) =>
@@ -101,6 +121,15 @@ namespace ImposterGame.Pages
         {
             Settings.ShowCategoryHintToImposter = value;
             await GameService.SaveSettingsAsync();
+        }
+
+        protected async Task InstallApp()
+        {
+            var installed = await AudioHaptic.PromptInstallPwaAsync();
+            if (installed)
+            {
+                CanInstallPwa = false;
+            }
         }
 
         protected void CloseDialog()

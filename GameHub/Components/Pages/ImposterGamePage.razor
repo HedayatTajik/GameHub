@@ -1,6 +1,6 @@
 @page "/impostergame"
 @inherits ImposterGame.Pages.ImposterGamePage
-<PageTitle>بازی شیاد</PageTitle>
+<PageTitle>@L.AppTitle</PageTitle>
 
 <NavigationLock ConfirmExternalNavigation="@ShouldConfirmExit"
                 OnBeforeInternalNavigation="@HandleBeforeInternalNavigation" />
@@ -11,14 +11,14 @@
         <!-- Quick Settings Summary Bar -->
         <button type="button" class="settings-summary-bar" @onclick="OpenSettingsDialog">
             <span class="settings-summary-text">@SettingsSummary</span>
-            <span class="settings-summary-cta">⚙️ تغییر</span>
+            <span class="settings-summary-cta">@L.ChangeButton</span>
         </button>
 
         <!-- Players Roster Card -->
         <div class="game-card">
             <div class="section-header-row">
-                <span class="section-title">👥 بازیکنان</span>
-                <span class="count-pill">@players.Count نفر</span>
+                <span class="section-title">@L.PlayersTitle</span>
+                <span class="count-pill">@L.PlayersCountBadge(players.Count)</span>
             </div>
 
             @if (players.Any(p => !string.IsNullOrEmpty(p.Name)))
@@ -33,7 +33,7 @@
                                 <span class="player-name">@player.Name</span>
                                 <button type="button"
                                         class="player-remove-btn"
-                                        aria-label="@($"حذف {player.Name}")"
+                                        aria-label="@L.RemovePlayerAria(player.Name)"
                                         @onclick="() => RemovePlayer(player)">
                                     ✕
                                 </button>
@@ -45,15 +45,15 @@
             else
             {
                 <div class="empty-players-box">
-                    هنوز بازیکنی اضافه نشده است.<br />
-                    نام و آواتار اولین بازیکن را در بخش پایین انتخاب کنید 👇
+                    @L.EmptyPlayersLine1<br />
+                    @L.EmptyPlayersLine2
                 </div>
             }
 
             @if (players.Count >= ImposterGame.Services.GameService.MinPlayers)
             {
                 <button type="button" class="success-action-btn" @onclick="AssignRoles">
-                    🎮 شروع بازی (@players.Count بازیکن)
+                    @L.StartGameWithCount(players.Count)
                 </button>
             }
             else
@@ -62,7 +62,7 @@
                 var pct = (int)Math.Round(players.Count * 100.0 / ImposterGame.Services.GameService.MinPlayers);
                 <div class="min-players-progress">
                     <span class="min-players-text">
-                        برای شروع بازی @remaining بازیکن دیگر اضافه کنید (@players.Count از @ImposterGame.Services.GameService.MinPlayers)
+                        @L.NeedMorePlayers(remaining, players.Count, ImposterGame.Services.GameService.MinPlayers)
                     </span>
                     <div class="progress-track">
                         <div class="progress-fill" style="@($"width:{pct}%;")"></div>
@@ -73,19 +73,19 @@
 
         <!-- Add New Player Card -->
         <div class="game-card">
-            <div class="section-title">➕ افزودن بازیکن جدید</div>
+            <div class="section-title">@L.AddNewPlayerTitle</div>
 
             <div class="add-player-row">
                 <RadzenTextBox Value="@newPlayer.Name"
                                ValueChanged="@OnNameChanged"
                                Immediate="true"
                                @onkeydown="HandleKeyDown"
-                               Placeholder="نام بازیکن را بنویسید..."
+                               Placeholder="@L.PlayerNamePlaceholder"
                                class="add-player-input" />
 
                 <button type="button"
                         class="add-player-btn"
-                        aria-label="افزودن بازیکن"
+                        aria-label="@L.AddPlayerAria"
                         @onclick="AddPlayer">
                     ＋
                 </button>
@@ -108,7 +108,7 @@ else
     <div class="page-stack">
         <div class="game-card reveal-card">
             <div class="reveal-progress-wrap">
-                <span class="progress-pill">بازیکن @(currentIndex + 1) از @GameService.Players.Count</span>
+                <span class="progress-pill">@L.PlayerProgress(currentIndex + 1, GameService.Players.Count)</span>
                 <div class="progress-track">
                     <div class="progress-fill" style="@($"width:{revealPct}%;")"></div>
                 </div>
@@ -118,21 +118,8 @@ else
 
             <div class="reveal-player-name">@CurrentPlayer.Name</div>
 
-            @if (!CurrentPlayer.HasViewedCard)
-            {
-                <div class="mystery-card-back">
-                    <span class="mystery-card-icon">🔒</span>
-                    <span class="mystery-card-title">کارت مخفی آماده است</span>
-                    <span class="mystery-card-hint">
-                        مطمئن شوید فقط <strong>@CurrentPlayer.Name</strong> صفحه را می‌بیند
-                    </span>
-                </div>
-
-                <button type="button" class="primary-action-btn" @onclick="ShowCard">
-                    👀 نمایش کارت من
-                </button>
-            }
-            else
+            <!-- Hold-to-Reveal Card Area (fixed min-height prevents layout jump while holding) -->
+            @if (isHoldingCard)
             {
                 <div class="card-reveal-box @(CurrentPlayer.IsImposter ? "imposter" : "word")">
                     @if (!CurrentPlayer.IsImposter && !string.IsNullOrEmpty(GameService.CurrentCategoryName))
@@ -147,34 +134,62 @@ else
                         @if (Settings.ShowCategoryHintToImposter && !string.IsNullOrEmpty(GameService.CurrentCategoryName))
                         {
                             <div class="imposter-hint-badge">
-                                💡 دسته‌بندی: @GameService.CurrentCategoryIcon @GameService.CurrentCategoryName
+                                @L.ImposterCategoryHint(GameService.CurrentCategoryIcon, GameService.CurrentCategoryName)
                             </div>
                         }
 
                         <div class="imposter-extra-note">
                             @(GameService.ActiveImposterCount > 1
-                                ? $"در این دور {GameService.ActiveImposterCount} شیاد در بازی هستند — طبیعی رفتار کنید و کلمه را حدس بزنید!"
-                                : "طبیعی رفتار کنید و از روی سرنخ‌ها کلمه اصلی را حدس بزنید!")
+                                ? L.ImposterTipMulti(GameService.ActiveImposterCount)
+                                : L.ImposterTipSingle)
                         </div>
                     }
                 </div>
+            }
+            else
+            {
+                <div class="mystery-card-back @(CurrentPlayer.HasViewedCard ? "seen" : string.Empty)">
+                    <span class="mystery-card-icon">@(CurrentPlayer.HasViewedCard ? "✅" : "🔒")</span>
+                    <span class="mystery-card-title">
+                        @(CurrentPlayer.HasViewedCard ? L.MysteryCardSeenTitle : L.MysteryCardTitle)
+                    </span>
+                    <span class="mystery-card-hint">
+                        @(CurrentPlayer.HasViewedCard ? L.HoldAgainHint : L.MysteryCardHint(CurrentPlayer.Name))
+                    </span>
+                </div>
+            }
 
+            <!-- Press & Hold Button -->
+            <button type="button"
+                    class="hold-reveal-btn @(isHoldingCard ? "holding" : string.Empty)"
+                    @onpointerdown="StartHoldCard"
+                    @onpointerup="EndHoldCard"
+                    @onpointerleave="EndHoldCard"
+                    @onpointercancel="EndHoldCard"
+                    @onkeydown="HandleHoldKeyDown"
+                    @onkeyup="HandleHoldKeyUp"
+                    @oncontextmenu:preventDefault="true">
+                @(isHoldingCard ? L.HoldingButton : L.HoldToRevealButton)
+            </button>
+
+            @if (CurrentPlayer.HasViewedCard && !isHoldingCard)
+            {
                 @if (currentIndex >= GameService.Players.Count - 1)
                 {
                     <button type="button" class="success-action-btn" @onclick="StartGame">
-                        🎮 شروع زمان بازی
+                        @L.StartTimerButton
                     </button>
                 }
                 else
                 {
                     <button type="button" class="primary-action-btn" @onclick="NextPlayer">
-                        ➡️ مخفی کردن و نفر بعدی
+                        @L.NextPlayerButton
                     </button>
                 }
             }
 
             <button type="button" class="ghost-action-btn" @onclick="CancelGame">
-                بازگشت به لیست بازیکنان
+                @L.BackToLobbyButton
             </button>
         </div>
     </div>

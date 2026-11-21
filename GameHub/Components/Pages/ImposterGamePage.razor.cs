@@ -12,10 +12,13 @@ namespace ImposterGame.Pages
         [Inject] private NavigationManager NavigationManager { get; set; } = default!;
         [Inject] private DialogService DialogService { get; set; } = default!;
         [Inject] public GameService GameService { get; set; } = default!;
+        [Inject] public LocalizationService L { get; set; } = default!;
+        [Inject] private AudioHapticService AudioHaptic { get; set; } = default!;
 
         public int currentIndex = 0;
 
         public bool gameStarted = false;
+        public bool isHoldingCard = false;
         public string selectedAvatar = string.Empty;
         public string validationMessage = string.Empty;
 
@@ -35,27 +38,8 @@ namespace ImposterGame.Pages
         public GameSettings Settings => GameService.Settings;
         public int EffectiveImposterCount => GameService.GetEffectiveImposterCount();
 
-        public string SettingsSummary
-        {
-            get
-            {
-                var levelPart = GameService.GetDifficultyLabel(Settings.Difficulty);
-
-                var categoryPart = Settings.SelectedCategoryIds.Count == 0
-                    ? "همه دسته‌ها"
-                    : $"{Settings.SelectedCategoryIds.Count} دسته";
-
-                var imposterPart = $"{EffectiveImposterCount} شیاد";
-
-                var timePart = Settings.AutoTimePerPlayer
-                    ? "زمان خودکار"
-                    : $"{Settings.RoundDurationMinutes} دقیقه";
-
-                var hintPart = Settings.ShowCategoryHintToImposter ? " • با راهنمایی" : string.Empty;
-
-                return $"{levelPart} • {categoryPart} ({GameService.GetActiveWordPoolCount()} کلمه) • {imposterPart} • {timePart}{hintPart}";
-            }
-        }
+        public string SettingsSummary =>
+            L.BuildSettingsSummary(Settings, EffectiveImposterCount, GameService.GetActiveWordPoolCount());
 
         protected override void OnInitialized()
         {
@@ -87,7 +71,7 @@ namespace ImposterGame.Pages
         public async Task OpenSettingsDialog()
         {
             await DialogService.OpenAsync<GameHub.Components.Pages.GameSettingsDialog>(
-                "⚙️ تنظیمات بازی",
+                L.NavSettingsTitle,
                 options: GameSettingsDialog.CreateDialogOptions());
         }
 
@@ -97,19 +81,19 @@ namespace ImposterGame.Pages
 
             if (string.IsNullOrWhiteSpace(newPlayer.Name))
             {
-                validationMessage = "لطفاً نام بازیکن را وارد کنید.";
+                validationMessage = L.ValidationNameRequired;
                 return;
             }
 
             if (GameService.PlayerNameExists(newPlayer.Name))
             {
-                validationMessage = "این نام قبلاً اضافه شده است.";
+                validationMessage = L.ValidationDuplicateName;
                 return;
             }
 
             if (string.IsNullOrEmpty(selectedAvatar))
             {
-                validationMessage = "لطفاً یک آواتار انتخاب کنید.";
+                validationMessage = L.ValidationAvatarRequired;
                 return;
             }
 
@@ -117,6 +101,8 @@ namespace ImposterGame.Pages
                 name: newPlayer.Name,
                 uri: selectedAvatar
             );
+
+            await AudioHaptic.PlayClickAsync(Settings.SoundEnabled);
 
             players = GameService.ListNewPlayers();
             selectedAvatar = string.Empty;
@@ -144,25 +130,29 @@ namespace ImposterGame.Pages
         {
             players = await GameService.DeleteUser(player);
             validationMessage = string.Empty;
+            await AudioHaptic.PlayClickAsync(Settings.SoundEnabled);
         }
 
-        public void AssignRoles()
+        public async Task AssignRoles()
         {
             if (players.Count < GameService.MinPlayers)
             {
-                validationMessage = $"برای شروع بازی حداقل {GameService.MinPlayers} بازیکن لازم است.";
+                validationMessage = L.ValidationMinPlayers(GameService.MinPlayers);
                 return;
             }
 
             validationMessage = string.Empty;
             _isTransitioningToTimer = false;
+            isHoldingCard = false;
             currentIndex = 0;
             GameService.AssignRoles();
             gameStarted = true;
+            await AudioHaptic.PlayClickAsync(Settings.SoundEnabled);
         }
 
         public async Task CancelGame()
         {
+            isHoldingCard = false;
             if (await ConfirmExitGameAsync())
             {
                 GameService.ResetRound();
@@ -184,6 +174,7 @@ namespace ImposterGame.Pages
                 return;
             }
 
+            isHoldingCard = false;
             var confirmed = await ConfirmExitGameAsync();
             if (!confirmed)
             {
@@ -206,12 +197,12 @@ namespace ImposterGame.Pages
             try
             {
                 var result = await DialogService.Confirm(
-                    "بازی در حال اجراست. آیا مطمئن هستید که می‌خواهید از بازی خارج شوید؟",
-                    "⚠️ توقف بازی",
+                    L.ConfirmExitMessage,
+                    L.ConfirmExitTitle,
                     new ConfirmOptions
                     {
-                        OkButtonText = "بله، خروج از بازی",
-                        CancelButtonText = "ادامه بازی",
+                        OkButtonText = L.ConfirmExitOk,
+                        CancelButtonText = L.ConfirmContinue,
                         CloseDialogOnOverlayClick = true,
                         ShowClose = false,
                         Draggable = false,
@@ -227,25 +218,60 @@ namespace ImposterGame.Pages
             }
         }
 
-        public void ShowCard()
+        public async Task StartHoldCard()
         {
-            if (CurrentPlayer is not null)
+            if (isHoldingCard || CurrentPlayer is null)
             {
-                CurrentPlayer.HasViewedCard = true;
+                return;
+            }
+
+            isHoldingCard = true;
+            CurrentPlayer.HasViewedCard = true;
+            await AudioHaptic.PlayCardRevealAsync(Settings.SoundEnabled);
+        }
+
+        public async Task EndHoldCard()
+        {
+            if (!isHoldingCard)
+            {
+                return;
+            }
+
+            isHoldingCard = false;
+            await AudioHaptic.PlayCardHideAsync(Settings.SoundEnabled);
+        }
+
+        public async Task HandleHoldKeyDown(KeyboardEventArgs e)
+        {
+            if (e.Key is " " or "Enter")
+            {
+                await StartHoldCard();
             }
         }
 
-        public void NextPlayer()
+        public async Task HandleHoldKeyUp(KeyboardEventArgs e)
         {
+            if (e.Key is " " or "Enter")
+            {
+                await EndHoldCard();
+            }
+        }
+
+        public async Task NextPlayer()
+        {
+            isHoldingCard = false;
             if (currentIndex < GameService.Players.Count - 1)
             {
                 currentIndex++;
+                await AudioHaptic.PlayClickAsync(Settings.SoundEnabled);
             }
         }
 
-        public void StartGame()
+        public async Task StartGame()
         {
+            isHoldingCard = false;
             _isTransitioningToTimer = true;
+            await AudioHaptic.PlayClickAsync(Settings.SoundEnabled);
             NavigationManager.NavigateTo($"/timer?playerCount={players.Count}");
         }
 
@@ -261,7 +287,7 @@ namespace ImposterGame.Pages
         public string CardText =>
             CurrentPlayer is null
                 ? string.Empty
-                : CurrentPlayer.IsImposter ? "🕵️ شما شیاد هستید!" : CurrentPlayer.Word;
+                : CurrentPlayer.IsImposter ? L.ImposterCardTitle : CurrentPlayer.Word;
 
         public void Dispose()
         {

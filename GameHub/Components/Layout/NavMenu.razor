@@ -1,6 +1,7 @@
 @implements IDisposable
 @inject DialogService DialogService
 @inject ImposterGame.Services.GameService GameService
+@inject ImposterGame.Services.LocalizationService L
 @inject NavigationManager NavigationManager
 
 <header class="app-topbar">
@@ -8,7 +9,7 @@
         <div class="topbar-start">
             <button type="button"
                     class="icon-btn mobile-only"
-                    aria-label="منو"
+                    aria-label="@L.NavMenuLabel"
                     aria-expanded="@(!collapseNavMenu)"
                     @onclick="ToggleNavMenu">
                 @(collapseNavMenu ? "☰" : "✕")
@@ -16,26 +17,34 @@
 
             <a class="brand-link" href="/" @onclick="CloseNavMenu">
                 <span class="brand-icon">🎭</span>
-                <span class="brand-title">بازی شیاد</span>
+                <span class="brand-title">@L.AppTitle</span>
             </a>
         </div>
 
-        <nav class="desktop-nav" aria-label="منوی اصلی">
-            <NavLink class="desktop-nav-link" href="" Match="NavLinkMatch.All">خانه</NavLink>
-            <NavLink class="desktop-nav-link" href="impostergame">بازی شیاد</NavLink>
-            <NavLink class="desktop-nav-link" href="aboutgame">درباره بازی</NavLink>
+        <nav class="desktop-nav" aria-label="@L.NavMenuLabel">
+            <NavLink class="desktop-nav-link" href="" Match="NavLinkMatch.All">@L.NavHome</NavLink>
+            <NavLink class="desktop-nav-link" href="impostergame">@L.NavGame</NavLink>
+            <NavLink class="desktop-nav-link" href="aboutgame">@L.NavAbout</NavLink>
         </nav>
 
         <div class="topbar-end">
+            <button type="button"
+                    class="icon-btn"
+                    aria-label="@L.ToggleDarkModeLabel"
+                    title="@L.ToggleDarkModeLabel"
+                    @onclick="ToggleDarkMode">
+                @(GameService.Settings.DarkMode ? "☀️" : "🌙")
+            </button>
+
             @if (ShowSettingsButton)
             {
                 <button type="button"
                         class="settings-trigger-btn"
-                        aria-label="تنظیمات بازی"
-                        title="تنظیمات بازی"
+                        aria-label="@L.NavSettingsTitle"
+                        title="@L.NavSettingsTitle"
                         @onclick="OpenSettingsDialog">
                     <span class="settings-icon">⚙️</span>
-                    <span class="settings-label">تنظیمات</span>
+                    <span class="settings-label">@L.NavSettings</span>
                 </button>
             }
         </div>
@@ -45,24 +54,24 @@
 @if (!collapseNavMenu)
 {
     <div class="mobile-nav-backdrop" @onclick="CloseNavMenu"></div>
-    <nav class="mobile-nav-drawer" aria-label="منوی موبایل">
+    <nav class="mobile-nav-drawer" aria-label="@L.NavMenuLabel">
         <NavLink class="mobile-nav-link" href="" Match="NavLinkMatch.All" @onclick="CloseNavMenu">
             <span>🏠</span>
-            <span>خانه</span>
+            <span>@L.NavHome</span>
         </NavLink>
         <NavLink class="mobile-nav-link" href="impostergame" @onclick="CloseNavMenu">
             <span>🎭</span>
-            <span>بازی شیاد</span>
+            <span>@L.NavGame</span>
         </NavLink>
         <NavLink class="mobile-nav-link" href="aboutgame" @onclick="CloseNavMenu">
             <span>📖</span>
-            <span>درباره بازی</span>
+            <span>@L.NavAbout</span>
         </NavLink>
         @if (ShowSettingsButton)
         {
             <button type="button" class="mobile-nav-link mobile-nav-action" @onclick="OpenSettingsFromMenu">
                 <span>⚙️</span>
-                <span>تنظیمات بازی</span>
+                <span>@L.NavSettings</span>
             </button>
         }
     </nav>
@@ -86,7 +95,17 @@
     protected override void OnInitialized()
     {
         GameService.OnGameStateChanged += HandleStateChanged;
+        GameService.OnSettingsChanged += HandleStateChanged;
         NavigationManager.LocationChanged += HandleLocationChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await GameService.LoadSettingsAsync();
+            StateHasChanged();
+        }
     }
 
     private void HandleStateChanged()
@@ -110,6 +129,11 @@
         collapseNavMenu = true;
     }
 
+    private async Task ToggleDarkMode()
+    {
+        await GameService.ToggleDarkModeAsync();
+    }
+
     private async Task OpenSettingsFromMenu()
     {
         collapseNavMenu = true;
@@ -119,13 +143,14 @@
     private async Task OpenSettingsDialog()
     {
         await DialogService.OpenAsync<GameHub.Components.Pages.GameSettingsDialog>(
-            "⚙️ تنظیمات بازی",
+            L.NavSettingsTitle,
             options: ImposterGame.Pages.GameSettingsDialog.CreateDialogOptions());
     }
 
     public void Dispose()
     {
         GameService.OnGameStateChanged -= HandleStateChanged;
+        GameService.OnSettingsChanged -= HandleStateChanged;
         NavigationManager.LocationChanged -= HandleLocationChanged;
     }
 }

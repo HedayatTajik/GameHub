@@ -1,16 +1,36 @@
 @page "/not-found"
 @layout MainLayout
+@implements IDisposable
 @inject NavigationManager Navigation
+@inject ImposterGame.Services.GameService GameService
+@inject ImposterGame.Services.LocalizationService L
 
-<PageTitle>صفحه پیدا نشد</PageTitle>
+<PageTitle>@L.NotFoundTitle</PageTitle>
 
 <div class="page-stack">
     <div class="game-card hero-card">
         <div style="font-size:3rem; line-height:1;">🔍</div>
-        <h2 style="margin:0; font-size:1.45rem; font-weight:800;">صفحه مورد نظر پیدا نشد</h2>
-        <p class="hero-subtitle">آدرسی که وارد کرده‌اید وجود ندارد.</p>
+        <h2 style="margin:0; font-size:1.45rem; font-weight:800;">@L.NotFoundTitle</h2>
+        <p class="hero-subtitle">@L.NotFoundMessage</p>
         <button type="button" class="primary-action-btn" @onclick='() => Navigation.NavigateTo("/")'>
-            🏠 بازگشت به خانه
+            @L.BackHomeButton
         </button>
     </div>
 </div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        GameService.OnSettingsChanged += HandleSettingsChanged;
+    }
+
+    private void HandleSettingsChanged()
+    {
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        GameService.OnSettingsChanged -= HandleSettingsChanged;
+    }
+}

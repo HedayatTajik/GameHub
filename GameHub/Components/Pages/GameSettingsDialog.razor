@@ -2,34 +2,77 @@
 @using ImposterGame.Models
 
 <div class="settings-dialog-body">
+    <!-- Language Selection -->
+    <section class="settings-section">
+        <div class="settings-section-title">@L.SettingsLanguageTitle</div>
+        <div class="language-control">
+            <button type="button"
+                    class="lang-btn @(Settings.Language == "fa" ? "active" : string.Empty)"
+                    @onclick='() => SetLanguage("fa")'>
+                🇮🇷 فارسی
+            </button>
+            <button type="button"
+                    class="lang-btn @(Settings.Language == "de" ? "active" : string.Empty)"
+                    @onclick='() => SetLanguage("de")'>
+                🇩🇪 Deutsch
+            </button>
+            <button type="button"
+                    class="lang-btn @(Settings.Language == "en" ? "active" : string.Empty)"
+                    @onclick='() => SetLanguage("en")'>
+                🇬🇧 English
+            </button>
+        </div>
+    </section>
+
+    <!-- Appearance & Audio/Haptics -->
+    <section class="settings-section">
+        <div class="settings-toggle-row">
+            <div>
+                <div class="settings-section-title">@L.SettingsAppearanceTitle</div>
+                <div class="settings-hint">@L.SettingsAppearanceHint</div>
+            </div>
+            <RadzenSwitch Value="@Settings.DarkMode" ValueChanged="@OnDarkModeChanged" />
+        </div>
+
+        <div class="settings-divider"></div>
+
+        <div class="settings-toggle-row">
+            <div>
+                <div class="settings-section-title">@L.SettingsSoundTitle</div>
+                <div class="settings-hint">@L.SettingsSoundHint</div>
+            </div>
+            <RadzenSwitch Value="@Settings.SoundEnabled" ValueChanged="@OnSoundChanged" />
+        </div>
+    </section>
+
     <!-- Difficulty Level -->
     <section class="settings-section">
-        <div class="settings-section-title">🎯 سطح بازی</div>
+        <div class="settings-section-title">@L.SettingsDifficultyTitle</div>
         <div class="difficulty-control">
             <button type="button"
                     class="difficulty-btn easy @(Settings.Difficulty == WordDifficulty.Easy ? "active" : string.Empty)"
                     @onclick="() => SetDifficulty(WordDifficulty.Easy)">
-                🟢 آسان
+                @L.DifficultyLabel(WordDifficulty.Easy)
             </button>
             <button type="button"
                     class="difficulty-btn medium @(Settings.Difficulty == WordDifficulty.Medium ? "active" : string.Empty)"
                     @onclick="() => SetDifficulty(WordDifficulty.Medium)">
-                🟡 متوسط
+                @L.DifficultyLabel(WordDifficulty.Medium)
             </button>
             <button type="button"
                     class="difficulty-btn hard @(Settings.Difficulty == WordDifficulty.Hard ? "active" : string.Empty)"
                     @onclick="() => SetDifficulty(WordDifficulty.Hard)">
-                🔴 سخت
+                @L.DifficultyLabel(WordDifficulty.Hard)
             </button>
         </div>
-        <div class="settings-hint">@DifficultyDescription</div>
+        <div class="settings-hint">@L.DifficultyDescription(Settings.Difficulty)</div>
     </section>
 
     <!-- Word Categories -->
     <section class="settings-section">
         <div class="settings-section-header">
-            <span class="settings-section-title">📚 دسته‌بندی کلمات</span>
-            <span class="pill-badge">@ActiveWordCount کلمه</span>
+            <span class="settings-section-title">@L.SettingsCategoriesTitle</span>
+            <span class="pill-badge">@L.WordsCountPill(ActiveWordCount)</span>
         </div>
 
         <div class="category-chips">
@@ -39,7 +82,7 @@
             <button type="button"
                     class="chip-btn @(allSelected ? "active" : string.Empty)"
                     @onclick="SelectAllCategories">
-                ✨ همه دسته‌ها
+                @L.AllCategoriesChip
             </button>
 
             @foreach (var category in Categories)
@@ -58,24 +101,24 @@
 
     <!-- Imposter Count -->
     <section class="settings-section">
-        <div class="settings-section-title">🕵️ تعداد شیادها</div>
+        <div class="settings-section-title">@L.SettingsImpostersTitle</div>
         <div class="segmented-control">
             <button type="button"
                     class="segment-btn @(EffectiveImposterCount == 1 ? "active" : string.Empty)"
                     @onclick="() => SetImposterCount(1)">
-                ۱ شیاد
+                @L.ImposterOption(1)
             </button>
             <button type="button"
                     class="segment-btn @(EffectiveImposterCount == 2 ? "active" : string.Empty)"
                     disabled="@(!CanUseTwoImposters)"
                     @onclick="() => SetImposterCount(2)">
-                ۲ شیاد
+                @L.ImposterOption(2)
             </button>
         </div>
         @if (!CanUseTwoImposters)
         {
             <div class="settings-hint">
-                برای انتخاب ۲ شیاد حداقل @ImposterGame.Services.GameService.MinPlayersForTwoImposters بازیکن لازم است.
+                @L.TwoImpostersHint(ImposterGame.Services.GameService.MinPlayersForTwoImposters)
             </div>
         }
     </section>
@@ -84,8 +127,8 @@
     <section class="settings-section">
         <div class="settings-toggle-row">
             <div>
-                <div class="settings-section-title">⏱️ زمان خودکار</div>
-                <div class="settings-hint">۱ دقیقه به ازای هر بازیکن</div>
+                <div class="settings-section-title">@L.SettingsAutoTimeTitle</div>
+                <div class="settings-hint">@L.SettingsAutoTimeHint</div>
             </div>
             <RadzenSwitch Value="@Settings.AutoTimePerPlayer" ValueChanged="@OnAutoTimeChanged" />
         </div>
@@ -99,7 +142,7 @@
                         @onclick="() => ChangeRoundMinutes(-1)">
                     −
                 </button>
-                <span class="stepper-value">@Settings.RoundDurationMinutes دقیقه</span>
+                <span class="stepper-value">@L.MinutesLabel(Settings.RoundDurationMinutes)</span>
                 <button type="button"
                         class="stepper-btn"
                         disabled="@(Settings.RoundDurationMinutes >= ImposterGame.Services.GameService.MaxRoundMinutes)"
@@ -114,15 +157,22 @@
     <section class="settings-section">
         <div class="settings-toggle-row">
             <div>
-                <div class="settings-section-title">💡 راهنمایی برای شیاد</div>
-                <div class="settings-hint">شیاد فقط نام دسته‌بندی کلمه را می‌بیند</div>
+                <div class="settings-section-title">@L.SettingsHintTitle</div>
+                <div class="settings-hint">@L.SettingsHintDesc</div>
             </div>
             <RadzenSwitch Value="@Settings.ShowCategoryHintToImposter" ValueChanged="@OnCategoryHintChanged" />
         </div>
     </section>
 
+    @if (CanInstallPwa)
+    {
+        <button type="button" class="soft-action-btn" @onclick="InstallApp">
+            @L.InstallAppButton
+        </button>
+    }
+
     <!-- Done Button -->
     <button type="button" class="primary-action-btn" @onclick="CloseDialog">
-        ✓ تأیید و بستن
+        @L.SaveAndCloseButton
     </button>
 </div>

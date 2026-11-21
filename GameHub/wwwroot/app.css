@@ -1,24 +1,45 @@
 :root {
-    --font-sans: 'Vazirmatn', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    --font-display: 'Lalezar', 'Vazirmatn', sans-serif;
+    --font-sans: 'Vazirmatn', 'Plus Jakarta Sans', 'Segoe UI', Tahoma, sans-serif;
+    --font-display: 'Lalezar', 'Plus Jakarta Sans', 'Vazirmatn', sans-serif;
+    --display-weight: 400;
     --rz-text-font-family: var(--font-sans);
     --rz-primary: #4f46e5;
     --rz-primary-light: #6366f1;
     --rz-primary-dark: #4338ca;
+
+    /* Light Warm Cozy Theme */
+    --app-bg:
+        radial-gradient(circle at 12% 8%, rgba(99, 102, 241, 0.08) 0%, transparent 42%),
+        radial-gradient(circle at 88% 18%, rgba(249, 115, 91, 0.08) 0%, transparent 40%),
+        linear-gradient(180deg, #faf7f2 0%, #f5f0e6 100%);
+    --topbar-bg: rgba(255, 253, 249, 0.86);
+    --nav-pill-bg: rgba(45, 38, 75, 0.05);
+    --brand-badge-bg: linear-gradient(135deg, #ede9fe 0%, #ffe4de 100%);
 
     --brand: #4f46e5;
     --brand-soft: #f3f1fe;
     --brand-border: #d8d3fc;
     --coral: #e85d4a;
     --coral-soft: #fff2ef;
+    --coral-text: #9e2a1b;
+    --coral-border: #f7b8ae;
     --emerald: #10b981;
     --emerald-dark: #059669;
-    --honey-bg: #fffbeb;
+    --honey-bg: linear-gradient(145deg, #fffdf4 0%, #fef3c7 100%);
     --honey-border: #f5c969;
+    --honey-text: #422006;
+    --honey-muted: #785925;
+    --imposter-card-bg: linear-gradient(145deg, #fff5f3 0%, #ffe0db 100%);
+    --imposter-card-border: #f7a79b;
+    --imposter-card-text: #8c2318;
+    --pill-overlay: rgba(255, 255, 255, 0.78);
+    --ring-track: #ede8dd;
+
     --surface: #ffffff;
     --surface-warm: #faf7f2;
-    --surface-subtle: #f5f1e8;
+    --surface-elevated: #ffffff;
     --border-soft: rgba(45, 38, 75, 0.09);
+    --border-strong: rgba(45, 38, 75, 0.14);
     --text-main: #1e1b2e;
     --text-muted: #6b657f;
     --shadow-card: 0 10px 30px rgba(45, 38, 75, 0.065);
@@ -26,6 +47,50 @@
     --radius-lg: 18px;
     --radius-md: 14px;
     --radius-sm: 10px;
+}
+
+html[lang="de"],
+html[lang="en"] {
+    --font-sans: 'Plus Jakarta Sans', 'Vazirmatn', 'Segoe UI', system-ui, sans-serif;
+    --font-display: 'Plus Jakarta Sans', 'Vazirmatn', system-ui, sans-serif;
+    --display-weight: 800;
+}
+
+/* Cozy Living-Room Dark Mode */
+html[data-theme="dark"] {
+    --app-bg:
+        radial-gradient(circle at 15% 10%, rgba(129, 140, 248, 0.14) 0%, transparent 45%),
+        radial-gradient(circle at 85% 20%, rgba(249, 115, 91, 0.12) 0%, transparent 42%),
+        linear-gradient(180deg, #13111c 0%, #191627 100%);
+    --topbar-bg: rgba(24, 21, 38, 0.86);
+    --nav-pill-bg: rgba(255, 255, 255, 0.06);
+    --brand-badge-bg: linear-gradient(135deg, rgba(129, 140, 248, 0.25) 0%, rgba(249, 115, 91, 0.22) 100%);
+
+    --brand: #818cf8;
+    --brand-soft: rgba(129, 140, 248, 0.16);
+    --brand-border: rgba(129, 140, 248, 0.34);
+    --coral: #fb7185;
+    --coral-soft: rgba(251, 113, 133, 0.14);
+    --coral-text: #fecdd3;
+    --coral-border: rgba(251, 113, 133, 0.35);
+    --honey-bg: linear-gradient(145deg, #2b2313 0%, #3a2d15 100%);
+    --honey-border: #b4832c;
+    --honey-text: #fef08a;
+    --honey-muted: #fde68a;
+    --imposter-card-bg: linear-gradient(145deg, #33181e 0%, #441c24 100%);
+    --imposter-card-border: #be4b5e;
+    --imposter-card-text: #fecdd3;
+    --pill-overlay: rgba(19, 17, 28, 0.48);
+    --ring-track: #2e2944;
+
+    --surface: #1f1c30;
+    --surface-warm: #27233b;
+    --surface-elevated: #2d2844;
+    --border-soft: rgba(255, 255, 255, 0.09);
+    --border-strong: rgba(255, 255, 255, 0.16);
+    --text-main: #f4f2ff;
+    --text-muted: #a6a0be;
+    --shadow-card: 0 12px 34px rgba(0, 0, 0, 0.38);
 }
 
 *, *::before, *::after {
@@ -37,13 +102,18 @@ html, body {
     padding: 0;
     min-height: 100dvh;
     font-family: var(--font-sans);
-    direction: rtl;
-    text-align: right;
+    text-align: start;
     color: var(--text-main);
     background-color: #faf7f2;
     -webkit-tap-highlight-color: transparent;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
+    transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+html[data-theme="dark"],
+html[data-theme="dark"] body {
+    background-color: #13111c;
 }
 
 button, a, input {
@@ -55,7 +125,6 @@ h1:focus {
     outline: none;
 }
 
-/* Smooth entrance animation */
 @keyframes softFadeUp {
     from {
         opacity: 0;
@@ -94,6 +163,7 @@ h1:focus {
     display: flex;
     flex-direction: column;
     gap: 14px;
+    transition: background-color 0.25s ease, border-color 0.25s ease;
 }
 
 @media (min-width: 480px) {
@@ -142,12 +212,12 @@ h1:focus {
     width: 104px;
     height: 104px;
     border-radius: 30px;
-    background: linear-gradient(145deg, #f3f1fe 0%, #ffe9e4 100%);
-    border: 1px solid rgba(79, 70, 229, 0.12);
+    background: var(--brand-badge-bg);
+    border: 1px solid var(--brand-border);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 12px 28px rgba(79, 70, 229, 0.12);
+    box-shadow: 0 12px 28px rgba(79, 70, 229, 0.16);
 }
 
 .hero-badge-glow img {
@@ -159,8 +229,8 @@ h1:focus {
 .hero-title {
     margin: 2px 0 0;
     font-family: var(--font-display);
-    font-size: 2.5rem;
-    font-weight: 400;
+    font-size: 2.35rem;
+    font-weight: var(--display-weight);
     color: var(--text-main);
     line-height: 1.15;
 }
@@ -183,7 +253,7 @@ h1:focus {
 .hero-stat-pill {
     font-size: 0.84rem;
     font-weight: 600;
-    color: #4b4566;
+    color: var(--text-main);
     background: var(--surface-warm);
     border: 1px solid var(--border-soft);
     padding: 6px 12px;
@@ -210,13 +280,14 @@ h1:focus {
 .coral-action-btn,
 .secondary-action-btn,
 .soft-action-btn,
-.ghost-action-btn {
+.ghost-action-btn,
+.hold-reveal-btn {
     width: 100%;
     min-height: 52px;
     padding: 12px 18px;
     border-radius: 16px;
     font-family: var(--font-sans);
-    font-size: 1.05rem;
+    font-size: 1.03rem;
     font-weight: 700;
     display: inline-flex;
     align-items: center;
@@ -248,7 +319,7 @@ h1:focus {
 .secondary-action-btn {
     background: var(--surface-warm);
     color: var(--text-main);
-    border: 1px solid rgba(45, 38, 75, 0.13);
+    border: 1px solid var(--border-strong);
 }
 
 .soft-action-btn {
@@ -263,6 +334,24 @@ h1:focus {
     color: var(--text-muted);
     font-size: 0.92rem;
     font-weight: 600;
+}
+
+/* Hold-to-Reveal tactile privacy button */
+.hold-reveal-btn {
+    min-height: 58px;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    color: #ffffff;
+    box-shadow: 0 10px 24px rgba(79, 70, 229, 0.32);
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    touch-action: none;
+}
+
+.hold-reveal-btn.holding {
+    transform: scale(0.97);
+    background: linear-gradient(135deg, #3730a3 0%, #6d28d9 100%);
+    box-shadow: 0 0 0 4px rgba(129, 140, 248, 0.32), 0 6px 16px rgba(79, 70, 229, 0.3);
 }
 
 .primary-action-btn:active,
@@ -286,15 +375,15 @@ h1:focus {
     width: 100%;
     padding: 12px 14px;
     border-radius: 18px;
-    background: #ffffff;
+    background: var(--surface);
     border: 1px solid var(--border-soft);
-    box-shadow: 0 4px 16px rgba(45, 38, 75, 0.045);
+    box-shadow: var(--shadow-card);
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 10px;
     cursor: pointer;
-    text-align: right;
+    text-align: start;
     transition: border-color 0.15s ease, transform 0.1s ease;
 }
 
@@ -308,7 +397,7 @@ h1:focus {
 
 .settings-summary-text {
     font-size: 0.88rem;
-    color: #46405c;
+    color: var(--text-main);
     font-weight: 600;
     line-height: 1.55;
 }
@@ -336,7 +425,7 @@ h1:focus {
     justify-content: space-between;
     gap: 12px;
     background: var(--surface-warm);
-    border: 1px solid rgba(45, 38, 75, 0.06);
+    border: 1px solid var(--border-soft);
     border-radius: 16px;
     padding: 8px 10px;
     transition: background-color 0.15s ease;
@@ -348,8 +437,8 @@ h1:focus {
     border-radius: 50%;
     object-fit: cover;
     flex-shrink: 0;
-    border: 2px solid #ffffff;
-    box-shadow: 0 2px 8px rgba(45, 38, 75, 0.12);
+    border: 2px solid var(--surface);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
 }
 
 .player-name {
@@ -357,7 +446,7 @@ h1:focus {
     font-size: 1.05rem;
     font-weight: 700;
     color: var(--text-main);
-    text-align: right;
+    text-align: start;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -368,7 +457,7 @@ h1:focus {
     height: 36px;
     border-radius: 50%;
     border: none;
-    background: #fdeae7;
+    background: var(--coral-soft);
     color: var(--coral);
     font-size: 0.9rem;
     font-weight: 700;
@@ -377,12 +466,11 @@ h1:focus {
     justify-content: center;
     cursor: pointer;
     flex-shrink: 0;
-    transition: background-color 0.14s ease, transform 0.1s ease;
+    transition: transform 0.1s ease;
 }
 
 .player-remove-btn:active {
     transform: scale(0.92);
-    background: #fbd5cf;
 }
 
 .empty-players-box {
@@ -390,7 +478,7 @@ h1:focus {
     padding: 18px 12px;
     border-radius: 16px;
     background: var(--surface-warm);
-    border: 1.5px dashed rgba(45, 38, 75, 0.14);
+    border: 1.5px dashed var(--border-strong);
     color: var(--text-muted);
     font-size: 0.92rem;
     line-height: 1.6;
@@ -422,8 +510,8 @@ h1:focus {
     overflow: hidden;
     padding: 0;
     background: var(--surface-warm);
-    border: 2.5px solid #ffffff;
-    box-shadow: 0 3px 10px rgba(45, 38, 75, 0.12);
+    border: 2.5px solid var(--surface);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.14);
     cursor: pointer;
     transition: transform 0.14s ease, border-color 0.14s ease, box-shadow 0.14s ease, opacity 0.14s ease;
 }
@@ -438,7 +526,7 @@ h1:focus {
 .avatar-option.selected {
     border-color: var(--brand);
     transform: scale(1.1);
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.22);
+    box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.34);
 }
 
 .avatar-option.used {
@@ -466,18 +554,23 @@ h1:focus {
     font-size: 1rem !important;
     font-family: var(--font-sans) !important;
     border-radius: 14px !important;
-    border: 1.5px solid rgba(45, 38, 75, 0.14) !important;
+    border: 1.5px solid var(--border-strong) !important;
     background: var(--surface-warm) !important;
     color: var(--text-main) !important;
     padding: 10px 14px !important;
     box-shadow: none !important;
 }
 
+.add-player-input .rz-textbox::placeholder,
+.add-player-input.rz-textbox::placeholder {
+    color: var(--text-muted) !important;
+}
+
 .add-player-input .rz-textbox:focus,
 .add-player-input.rz-textbox:focus {
     border-color: var(--brand) !important;
-    background: #ffffff !important;
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.14) !important;
+    background: var(--surface) !important;
+    box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.22) !important;
 }
 
 .add-player-btn {
@@ -486,7 +579,7 @@ h1:focus {
     padding: 0 16px;
     border-radius: 14px;
     border: none;
-    background: var(--brand);
+    background: #4f46e5;
     color: #ffffff;
     font-size: 1.3rem;
     font-weight: 700;
@@ -495,19 +588,19 @@ h1:focus {
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.25);
-    transition: transform 0.1s ease, background-color 0.15s ease;
+    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.28);
+    transition: transform 0.1s ease;
 }
 
 .add-player-btn:active {
     transform: scale(0.95);
-    background: #4338ca;
 }
 
 .validation-text {
     font-size: 0.9rem;
-    color: var(--coral);
+    color: var(--coral-text);
     background: var(--coral-soft);
+    border: 1px solid var(--coral-border);
     border-radius: 12px;
     padding: 8px 12px;
     text-align: center;
@@ -535,7 +628,7 @@ h1:focus {
     width: 100%;
     height: 7px;
     border-radius: 999px;
-    background: rgba(45, 38, 75, 0.09);
+    background: var(--ring-track);
     overflow: hidden;
 }
 
@@ -551,7 +644,7 @@ h1:focus {
     align-items: center;
     text-align: center;
     padding-top: 20px;
-    gap: 16px;
+    gap: 15px;
 }
 
 .reveal-progress-wrap {
@@ -572,86 +665,98 @@ h1:focus {
 }
 
 .reveal-avatar {
-    width: 104px;
-    height: 104px;
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
     object-fit: cover;
-    box-shadow: 0 10px 24px rgba(45, 38, 75, 0.14);
-    border: 4px solid #ffffff;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
+    border: 4px solid var(--surface);
 }
 
 .reveal-player-name {
-    font-size: 1.55rem;
+    font-size: 1.5rem;
     font-weight: 800;
     color: var(--text-main);
 }
 
 .mystery-card-back {
     width: 100%;
+    min-height: 150px;
     border-radius: 20px;
-    padding: 26px 18px;
+    padding: 24px 18px;
     background: linear-gradient(145deg, #2d264b 0%, #4338ca 100%);
     color: #ffffff;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 8px;
-    box-shadow: 0 12px 28px rgba(45, 38, 75, 0.22);
+    box-shadow: 0 12px 28px rgba(30, 27, 46, 0.28);
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.mystery-card-back.seen {
+    background: linear-gradient(145deg, #1f3a37 0%, #0f766e 100%);
 }
 
 .mystery-card-icon {
-    font-size: 2.3rem;
+    font-size: 2.2rem;
     line-height: 1;
 }
 
 .mystery-card-title {
-    font-size: 1.15rem;
+    font-size: 1.12rem;
     font-weight: 700;
 }
 
 .mystery-card-hint {
-    font-size: 0.88rem;
-    color: rgba(255, 255, 255, 0.82);
+    font-size: 0.86rem;
+    color: rgba(255, 255, 255, 0.85);
     line-height: 1.6;
 }
 
 .card-reveal-box {
     width: 100%;
+    min-height: 150px;
     border-radius: 20px;
-    padding: 24px 18px;
+    padding: 22px 18px;
     text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 10px;
-    animation: softFadeUp 0.22s ease-out;
+    animation: softFadeUp 0.16s ease-out;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .card-reveal-box.word {
-    background: linear-gradient(145deg, #fffdf4 0%, #fef3c7 100%);
+    background: var(--honey-bg);
     border: 1.5px solid var(--honey-border);
-    color: #422006;
-    box-shadow: 0 10px 24px rgba(245, 199, 105, 0.24);
+    color: var(--honey-text);
+    box-shadow: 0 10px 24px rgba(245, 199, 105, 0.2);
 }
 
 .card-reveal-box.imposter {
-    background: linear-gradient(145deg, #fff5f3 0%, #ffe0db 100%);
-    border: 1.5px solid #f7a79b;
-    color: #8c2318;
-    box-shadow: 0 10px 24px rgba(232, 93, 74, 0.18);
+    background: var(--imposter-card-bg);
+    border: 1.5px solid var(--imposter-card-border);
+    color: var(--imposter-card-text);
+    box-shadow: 0 10px 24px rgba(232, 93, 74, 0.2);
 }
 
 .reveal-category-tag {
-    font-size: 0.86rem;
+    font-size: 0.85rem;
     font-weight: 700;
     padding: 4px 12px;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.72);
-    color: #6b4407;
+    background: var(--pill-overlay);
+    color: var(--honey-muted);
 }
 
 .reveal-main-text {
-    font-size: clamp(1.65rem, 7vw, 2.15rem);
+    font-size: clamp(1.55rem, 7vw, 2.1rem);
     font-weight: 800;
     line-height: 1.35;
 }
@@ -660,16 +765,16 @@ h1:focus {
     margin-top: 2px;
     padding: 8px 14px;
     border-radius: 12px;
-    background: rgba(255, 255, 255, 0.85);
-    color: #8c2318;
-    font-size: 0.96rem;
+    background: var(--pill-overlay);
+    color: var(--imposter-card-text);
+    font-size: 0.94rem;
     font-weight: 700;
 }
 
 .imposter-extra-note {
-    font-size: 0.86rem;
-    color: #8c2318;
-    opacity: 0.88;
+    font-size: 0.85rem;
+    color: var(--imposter-card-text);
+    opacity: 0.9;
     line-height: 1.5;
 }
 
@@ -687,15 +792,15 @@ h1:focus {
     border: 1px solid var(--brand-border);
     padding: 8px 18px;
     border-radius: 999px;
-    font-size: 1.05rem;
+    font-size: 1.02rem;
     font-weight: 700;
 }
 
 .multi-imposter-badge {
     font-size: 0.88rem;
-    color: #9a3412;
-    background: #fff3e6;
-    border: 1px solid #fed7aa;
+    color: var(--coral-text);
+    background: var(--coral-soft);
+    border: 1px solid var(--coral-border);
     padding: 5px 14px;
     border-radius: 999px;
     font-weight: 700;
@@ -723,7 +828,7 @@ h1:focus {
 
 .timer-ring-bg {
     fill: none;
-    stroke: #ede8dd;
+    stroke: var(--ring-track);
     stroke-width: 11;
 }
 
@@ -735,7 +840,7 @@ h1:focus {
 }
 
 .timer-ring-progress.calm {
-    stroke: #4f46e5;
+    stroke: var(--brand);
 }
 
 .timer-ring-progress.warning {
@@ -743,7 +848,7 @@ h1:focus {
 }
 
 .timer-ring-progress.danger {
-    stroke: #e85d4a;
+    stroke: var(--coral);
 }
 
 .timer-ring-center {
@@ -780,15 +885,15 @@ h1:focus {
     padding: 12px 14px;
     border-radius: 14px;
     background: var(--coral-soft);
-    border: 1px solid #f7b8ae;
-    color: #9e2a1b;
-    font-size: 1.05rem;
+    border: 1px solid var(--coral-border);
+    color: var(--coral-text);
+    font-size: 1.02rem;
     font-weight: 700;
 }
 
 .result-reveal-box {
     width: 100%;
-    background: linear-gradient(145deg, #fffdf6 0%, #fef5dc 100%);
+    background: var(--honey-bg);
     border: 1.5px solid var(--honey-border);
     border-radius: 20px;
     padding: 18px 16px;
@@ -800,10 +905,10 @@ h1:focus {
 }
 
 .result-label {
-    font-size: 0.92rem;
+    font-size: 0.9rem;
     font-weight: 700;
     color: var(--coral);
-    background: rgba(255, 255, 255, 0.78);
+    background: var(--pill-overlay);
     padding: 3px 14px;
     border-radius: 999px;
 }
@@ -828,20 +933,20 @@ h1:focus {
     border-radius: 50%;
     object-fit: cover;
     border: 3px solid var(--coral);
-    box-shadow: 0 4px 12px rgba(232, 93, 74, 0.22);
+    box-shadow: 0 4px 12px rgba(232, 93, 74, 0.25);
 }
 
 .result-imposter-name {
     font-size: 1.15rem;
     font-weight: 800;
-    color: #8c2318;
+    color: var(--coral-text);
 }
 
 .result-word-pill {
-    font-size: 1.3rem;
+    font-size: 1.28rem;
     font-weight: 800;
-    color: #422006;
-    background: rgba(255, 255, 255, 0.85);
+    color: var(--honey-text);
+    background: var(--pill-overlay);
     padding: 8px 18px;
     border-radius: 14px;
     width: 100%;
@@ -850,35 +955,40 @@ h1:focus {
 .result-category {
     font-size: 0.88rem;
     font-weight: 600;
-    color: #785925;
+    color: var(--honey-muted);
 }
 
-/* Settings Dialog (Radzen Mobile-First) */
+/* Settings Dialog (Radzen Mobile-First + Dark Mode) */
 .mobile-settings-dialog {
     border-radius: 24px !important;
     max-height: 88dvh !important;
     overflow: hidden !important;
     font-family: var(--font-sans) !important;
-    box-shadow: 0 24px 60px rgba(30, 27, 46, 0.24) !important;
-    border: 1px solid rgba(45, 38, 75, 0.08) !important;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.34) !important;
+    border: 1px solid var(--border-soft) !important;
+    background: var(--surface) !important;
 }
 
 .mobile-settings-dialog .rz-dialog-titlebar {
-    padding: 16px 18px !important;
-    background: #faf7f2 !important;
-    border-bottom: 1px solid rgba(45, 38, 75, 0.08) !important;
+    padding: 15px 18px !important;
+    background: var(--surface-warm) !important;
+    border-bottom: 1px solid var(--border-soft) !important;
 }
 
 .mobile-settings-dialog .rz-dialog-title {
     font-family: var(--font-sans) !important;
-    font-size: 1.12rem !important;
+    font-size: 1.1rem !important;
     font-weight: 800 !important;
     color: var(--text-main) !important;
 }
 
+.mobile-settings-dialog .rz-dialog-titlebar-close {
+    color: var(--text-muted) !important;
+}
+
 .mobile-settings-dialog .rz-dialog-content {
     padding: 16px !important;
-    background: #ffffff !important;
+    background: var(--surface) !important;
     max-height: calc(88dvh - 60px) !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;
@@ -889,29 +999,32 @@ h1:focus {
     border-radius: 24px !important;
     overflow: hidden !important;
     font-family: var(--font-sans) !important;
-    box-shadow: 0 24px 60px rgba(30, 27, 46, 0.24) !important;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.34) !important;
+    background: var(--surface) !important;
+    border: 1px solid var(--border-soft) !important;
 }
 
 .mobile-confirm-dialog .rz-dialog-titlebar {
     padding: 15px 18px !important;
     background: var(--coral-soft) !important;
-    border-bottom: 1px solid #fbd5cf !important;
+    border-bottom: 1px solid var(--coral-border) !important;
 }
 
 .mobile-confirm-dialog .rz-dialog-title {
     font-family: var(--font-sans) !important;
-    font-size: 1.1rem !important;
+    font-size: 1.08rem !important;
     font-weight: 800 !important;
-    color: #9e2a1b !important;
+    color: var(--coral-text) !important;
 }
 
 .mobile-confirm-dialog .rz-dialog-content {
     padding: 18px !important;
+    background: var(--surface) !important;
     font-family: var(--font-sans) !important;
-    font-size: 0.98rem !important;
+    font-size: 0.96rem !important;
     line-height: 1.75 !important;
     color: var(--text-main) !important;
-    text-align: right !important;
+    text-align: start !important;
 }
 
 .mobile-confirm-dialog .rz-dialog-confirm-buttons {
@@ -925,7 +1038,7 @@ h1:focus {
     min-height: 46px !important;
     border-radius: 14px !important;
     font-family: var(--font-sans) !important;
-    font-size: 0.95rem !important;
+    font-size: 0.94rem !important;
     font-weight: 700 !important;
 }
 
@@ -933,7 +1046,7 @@ h1:focus {
     display: flex;
     flex-direction: column;
     gap: 14px;
-    text-align: right;
+    text-align: start;
 }
 
 .settings-section {
@@ -954,13 +1067,13 @@ h1:focus {
 }
 
 .settings-section-title {
-    font-size: 0.98rem;
+    font-size: 0.96rem;
     font-weight: 700;
     color: var(--text-main);
 }
 
 .settings-hint {
-    font-size: 0.83rem;
+    font-size: 0.82rem;
     color: var(--text-muted);
     line-height: 1.5;
 }
@@ -984,11 +1097,11 @@ h1:focus {
     min-height: 38px;
     padding: 6px 12px;
     border-radius: 999px;
-    border: 1.5px solid rgba(45, 38, 75, 0.12);
-    background: #ffffff;
-    color: #3f3a55;
+    border: 1.5px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--text-main);
     font-family: var(--font-sans);
-    font-size: 0.88rem;
+    font-size: 0.86rem;
     font-weight: 600;
     display: inline-flex;
     align-items: center;
@@ -1002,14 +1115,14 @@ h1:focus {
 }
 
 .chip-btn.active {
-    background: var(--brand);
-    border-color: var(--brand);
+    background: #4f46e5;
+    border-color: #4f46e5;
     color: #ffffff;
-    box-shadow: 0 4px 10px rgba(79, 70, 229, 0.22);
+    box-shadow: 0 4px 10px rgba(79, 70, 229, 0.25);
 }
 
 .chip-count {
-    font-size: 0.76rem;
+    font-size: 0.75rem;
     opacity: 0.82;
 }
 
@@ -1019,55 +1132,68 @@ h1:focus {
     gap: 8px;
 }
 
-.difficulty-control {
+.difficulty-control,
+.language-control {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 8px;
 }
 
-.difficulty-btn {
-    min-height: 46px;
+.difficulty-btn,
+.lang-btn {
+    min-height: 44px;
     border-radius: 13px;
-    border: 1.5px solid rgba(45, 38, 75, 0.12);
-    background: #ffffff;
-    color: #3f3a55;
+    border: 1.5px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--text-main);
     font-family: var(--font-sans);
-    font-size: 0.92rem;
+    font-size: 0.88rem;
     font-weight: 700;
     cursor: pointer;
     transition: transform 0.1s ease, background-color 0.14s ease, border-color 0.14s ease, color 0.14s ease;
 }
 
-.difficulty-btn:active {
+.difficulty-btn:active,
+.lang-btn:active {
     transform: scale(0.96);
+}
+
+.lang-btn.active {
+    border-color: var(--brand);
+    background: var(--brand-soft);
+    color: var(--brand);
 }
 
 .difficulty-btn.easy.active {
     border-color: #10b981;
-    background: #ecfdf5;
-    color: #065f46;
+    background: rgba(16, 185, 129, 0.16);
+    color: #10b981;
 }
 
 .difficulty-btn.medium.active {
     border-color: #f59e0b;
-    background: #fffbeb;
-    color: #92400e;
+    background: rgba(245, 158, 11, 0.16);
+    color: #d97706;
+}
+
+html[data-theme="dark"] .difficulty-btn.medium.active {
+    color: #fbbf24;
 }
 
 .difficulty-btn.hard.active {
-    border-color: #e85d4a;
-    background: #fff2ef;
-    color: #9e2a1b;
+    border-color: var(--coral);
+    background: var(--coral-soft);
+    color: var(--coral);
 }
 
 .segment-btn {
     min-height: 44px;
     border-radius: 13px;
-    border: 1.5px solid rgba(45, 38, 75, 0.12);
-    background: #ffffff;
-    color: #3f3a55;
+    border: 1.5px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--text-main);
     font-family: var(--font-sans);
-    font-size: 0.95rem;
+    font-size: 0.94rem;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.14s ease;
@@ -1091,11 +1217,17 @@ h1:focus {
     gap: 12px;
 }
 
+.settings-divider {
+    height: 1px;
+    background: var(--border-soft);
+    margin: 2px 0;
+}
+
 .stepper-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: #ffffff;
+    background: var(--surface);
     border: 1px solid var(--border-soft);
     border-radius: 14px;
     padding: 6px 8px;
@@ -1105,7 +1237,7 @@ h1:focus {
     width: 44px;
     height: 44px;
     border-radius: 11px;
-    border: 1px solid rgba(45, 38, 75, 0.12);
+    border: 1px solid var(--border-strong);
     background: var(--surface-warm);
     color: var(--text-main);
     font-size: 1.35rem;
@@ -1139,27 +1271,28 @@ h1:focus {
     padding: 15px;
     font-size: 0.96rem;
     line-height: 1.9;
-    color: #2d264b;
+    color: var(--text-main);
 }
 
 .about-section h4 {
     margin: 0 0 6px;
-    font-size: 1.06rem;
+    font-size: 1.05rem;
     font-weight: 800;
     color: var(--brand);
 }
 
 /* Radzen Switch brand polish */
 .rz-switch.rz-switch-checked .rz-switch-circle {
-    background-color: var(--brand) !important;
+    background-color: #4f46e5 !important;
 }
 
 /* Blazor error UI */
 #blazor-error-ui {
     color-scheme: light only;
     background: #fffbeb;
+    color: #1e1b2e;
     bottom: 0;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.16);
     box-sizing: border-box;
     display: none;
     left: 0;
@@ -1172,6 +1305,6 @@ h1:focus {
 #blazor-error-ui .dismiss {
     cursor: pointer;
     position: absolute;
-    left: 0.75rem;
+    inset-inline-end: 0.75rem;
     top: 0.55rem;
 }
