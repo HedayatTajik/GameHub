@@ -3,6 +3,21 @@ namespace ImposterGame.Models
     public class GameSettings
     {
         /// <summary>
+        /// UI and word-pool language: "fa" (Persian RTL), "de" (German LTR), or "en" (English LTR).
+        /// </summary>
+        public string Language { get; set; } = "fa";
+
+        /// <summary>
+        /// Enables cozy living-room dark mode.
+        /// </summary>
+        public bool DarkMode { get; set; } = false;
+
+        /// <summary>
+        /// Enables Web Audio sound effects and mobile vibration haptics.
+        /// </summary>
+        public bool SoundEnabled { get; set; } = true;
+
+        /// <summary>
         /// Difficulty level controlling which word pool is used (Easy, Medium, Hard).
         /// </summary>
         public WordDifficulty Difficulty { get; set; } = WordDifficulty.Medium;

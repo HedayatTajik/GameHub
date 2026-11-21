@@ -1,47 +1,114 @@
 @page "/aboutgame"
+@implements IDisposable
 @inject NavigationManager Navigation
+@inject ImposterGame.Services.GameService GameService
+@inject ImposterGame.Services.LocalizationService L
 
-<PageTitle>در مورد بازی</PageTitle>
+<PageTitle>@L.NavAbout</PageTitle>
 
 <div class="page-stack">
     <div class="game-card">
-        <h2 style="margin:0; font-family:var(--font-display); font-size:1.8rem; font-weight:400; color:var(--text-main); text-align:center;">
-            📖 راهنمای بازی شیاد
+        <h2 style="margin:0; font-family:var(--font-display); font-size:1.75rem; font-weight:var(--display-weight); color:var(--text-main); text-align:center;">
+            @L.T("📖 راهنمای بازی شیاد", "📖 Spielregeln – Imposter", "📖 How to Play Imposter")
         </h2>
 
-        <div class="about-section">
-            <h4>🎯 هدف بازی</h4>
-            یکی از بازیکنان (یا ۲ نفر در گروه‌های ۵ نفر به بالا) نقش <strong>شیاد</strong> دارد و کلمه‌ی اصلی را نمی‌داند. هدف شیاد این است که هویت خود را مخفی نگه دارد و کلمه را حدس بزند؛ بازیکنان دیگر باید شیاد را شناسایی کنند.
-        </div>
-
-        <div class="about-section">
-            <h4>🚀 شروع بازی</h4>
-            ۱. نام بازیکن‌ها را وارد کرده و برای هر نفر یک آواتار انتخاب کنید (حداقل ۳ نفر).<br />
-            ۲. از آیکون <strong>⚙️ تنظیمات</strong> در نوار بالا می‌توانید سطح سختی (آسان، متوسط، سخت)، دسته‌بندی کلمات، تعداد شیادها، زمان و راهنمایی برای شیاد را تنظیم کنید.<br />
-            ۳. با زدن دکمه سبز بازی شروع می‌شود.
-        </div>
-
-        <div class="about-section">
-            <h4>🃏 مراحل بازی</h4>
-            ۱. بازیکنان به ترتیب کارت خود را به صورت خصوصی می‌بینند.<br />
-            - بازیکنان غیرشیاد یک کلمه (مثل 🍎 سیب یا 🚗 ماشین) می‌بینند.<br />
-            - شیاد کلمه را نمی‌بیند (در صورت فعال بودن راهنمایی، فقط دسته‌بندی را می‌بیند).<br />
-            ۲. بازیکنان غیرشیاد <strong>نباید کلمه اصلی را به زبان بیاورند</strong> و فقط با کلمات مرتبط سرنخ می‌دهند.<br />
-            مثال: اگر کلمه «خورشید» باشد، بازیکن اول می‌گوید «زرد»، بازیکن دوم «گرم» و …<br />
-            ۳. شیاد باید با دقت گوش کند و کلمه اصلی را حدس بزند.
-        </div>
-
-        <div class="about-section">
-            <h4>🏆 پایان بازی و قوانین برد</h4>
-            - وقتی زمان تمام شد، بازیکنان <strong>با رای‌گیری</strong> شیاد را انتخاب می‌کنند.<br />
-            - اگر شیاد قبل از پایان بازی کلمه اصلی را درست حدس بزند، برنده می‌شود.<br />
-            - اگر بازیکنان با رای‌گیری شیاد را درست شناسایی کنند و شیاد کلمه را نداند، بازیکنان غیرشیاد برنده می‌شوند.
-        </div>
+        @if (L.Language == "de")
+        {
+            <div class="about-section">
+                <h4>🎯 Spielziel</h4>
+                Ein Spieler (oder 2 ab 5 Spielern) ist heimlich der <strong>Imposter</strong> und kennt das geheime Wort nicht. Der Imposter versucht, unentdeckt zu bleiben und das Wort zu erraten – alle anderen wollen den Imposter enttarnen.
+            </div>
+            <div class="about-section">
+                <h4>🚀 Spielstart</h4>
+                1. Mindestens 3 Spieler mit Namen und SVG-Avatar anlegen.<br />
+                2. Über <strong>⚙️ Einstellungen</strong> in der oberen Leiste kannst du Sprache (FA/DE/EN), Dark Mode, Sound/Vibration, Schwierigkeitsgrad (Leicht/Mittel/Schwer), Kategorien, Imposter-Anzahl, Rundenzeit und Kategorie-Hinweis einstellen.<br />
+                3. Mit dem grünen Start-Button beginnt die Runde.
+            </div>
+            <div class="about-section">
+                <h4>🃏 Karten-Sichtschutz (Gedrückt halten)</h4>
+                1. Jeder Spieler hält den Button gedrückt, um seine Karte privat zu sehen. Sobald der Finger losgelassen wird, verdeckt sich die Karte sofort wieder.<br />
+                2. Alle normalen Spieler geben reihum einen passenden Hinweis, <strong>ohne das geheime Wort selbst zu nennen</strong>.<br />
+                3. Der Imposter hört aufmerksam zu und blufft mit.
+            </div>
+            <div class="about-section">
+                <h4>🏆 Spielende & Sieg</h4>
+                - Nach Ablauf des Timers (mit Signalton & Vibration) stimmt die Gruppe ab, wer der Imposter ist.<br />
+                - Errät der Imposter das geheime Wort oder wird nicht enttarnt, gewinnt der Imposter.<br />
+                - Wird der Imposter richtig enttarnt und errät das Wort nicht, gewinnen die übrigen Spieler!
+            </div>
+        }
+        else if (L.Language == "en")
+        {
+            <div class="about-section">
+                <h4>🎯 Objective</h4>
+                One player (or 2 with 5+ players) is secretly the <strong>Imposter</strong> and doesn't know the secret word. The imposter tries to blend in and guess the word, while everyone else tries to identify the imposter.
+            </div>
+            <div class="about-section">
+                <h4>🚀 Getting Started</h4>
+                1. Add at least 3 players with names and SVG avatars.<br />
+                2. Tap <strong>⚙️ Settings</strong> in the top bar to pick language (FA/DE/EN), dark mode, sound & haptics, difficulty (Easy/Medium/Hard), categories, imposter count, timer, and category hint.<br />
+                3. Press the green Start button to begin.
+            </div>
+            <div class="about-section">
+                <h4>🃏 Hold-to-Reveal Privacy</h4>
+                1. Each player presses and holds the button to peek at their card privately. Releasing immediately hides it again before passing the phone.<br />
+                2. Crewmates give subtle related clues <strong>without saying the secret word</strong>.<br />
+                3. The imposter listens closely, bluffs, and tries to deduce the word.
+            </div>
+            <div class="about-section">
+                <h4>🏆 Winning the Round</h4>
+                - When the timer ends (with sound & vibration), the group votes on who the imposter is.<br />
+                - If the imposter guesses the secret word or avoids being caught, the imposter wins.<br />
+                - If the group catches the imposter and they can't guess the word, the crewmates win!
+            </div>
+        }
+        else
+        {
+            <div class="about-section">
+                <h4>🎯 هدف بازی</h4>
+                یکی از بازیکنان (یا ۲ نفر در گروه‌های ۵ نفر به بالا) نقش <strong>شیاد</strong> دارد و کلمه‌ی اصلی را نمی‌داند. هدف شیاد این است که هویت خود را مخفی نگه دارد و کلمه را حدس بزند؛ بازیکنان دیگر باید شیاد را شناسایی کنند.
+            </div>
+            <div class="about-section">
+                <h4>🚀 شروع بازی</h4>
+                ۱. نام بازیکن‌ها را وارد کرده و برای هر نفر یک آواتار انتخاب کنید (حداقل ۳ نفر).<br />
+                ۲. از آیکون <strong>⚙️ تنظیمات</strong> در نوار بالا می‌توانید زبان (فارسی/آلمانی/انگلیسی)، حالت شب، صدا و لرزش، سطح سختی (آسان، متوسط، سخت)، دسته‌بندی کلمات، تعداد شیادها، زمان و راهنمایی برای شیاد را تنظیم کنید.<br />
+                ۳. با زدن دکمه سبز بازی شروع می‌شود.
+            </div>
+            <div class="about-section">
+                <h4>🃏 دیدن کارت با حالت امن (نگه داشتن)</h4>
+                ۱. هر بازیکن برای دیدن کارت خود دکمه را <strong>نگه می‌دارد</strong>؛ به محض رها کردن انگشت، کارت فوراً مخفی می‌شود تا هنگام دست‌به‌دست کردن گوشی کسی نبیند.<br />
+                ۲. بازیکنان غیرشیاد <strong>نباید کلمه اصلی را به زبان بیاورند</strong> و فقط با کلمات مرتبط سرنخ می‌دهند.<br />
+                ۳. شیاد باید با دقت گوش کند و کلمه اصلی را حدس بزند.
+            </div>
+            <div class="about-section">
+                <h4>🏆 پایان بازی و قوانین برد</h4>
+                - وقتی زمان تمام شد (با زنگ و ویبره)، بازیکنان <strong>با رای‌گیری</strong> شیاد را انتخاب می‌کنند.<br />
+                - اگر شیاد کلمه اصلی را درست حدس بزند یا شناسایی نشود، برنده می‌شود.<br />
+                - اگر بازیکنان شیاد را درست شناسایی کنند و او کلمه را نداند، بازیکنان غیرشیاد برنده می‌شوند.
+            </div>
+        }
 
         <button type="button"
                 class="success-action-btn"
                 @onclick='() => Navigation.NavigateTo("/impostergame")'>
-            🎭 شروع بازی شیاد
+            @L.HomeStartButton
         </button>
     </div>
 </div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        GameService.OnSettingsChanged += HandleSettingsChanged;
+    }
+
+    private void HandleSettingsChanged()
+    {
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        GameService.OnSettingsChanged -= HandleSettingsChanged;
+    }
+}

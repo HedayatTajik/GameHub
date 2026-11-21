@@ -1,38 +1,43 @@
 @page "/"
 
-<PageTitle>بازی شیاد</PageTitle>
+<PageTitle>@L.AppTitle</PageTitle>
 
 <div class="page-stack">
     <div class="game-card hero-card">
         <div class="hero-badge-glow">
-            <img src="/Icons/mask.png" alt="بازی شیاد" />
+            <img src="/Icons/mask.png" alt="@L.AppTitle" />
         </div>
 
-        <h1 class="hero-title">بازی شیاد</h1>
-        <p class="hero-subtitle">
-            دورهمی، هیجان و بلوف! شیاد را بین دوستانتان پیدا کنید قبل از اینکه کلمه مخفی را حدس بزند.
-        </p>
+        <h1 class="hero-title">@L.AppTitle</h1>
+        <p class="hero-subtitle">@L.HeroSubtitle</p>
 
         <div class="hero-stats-row">
-            <span class="hero-stat-pill">📚 ۸ دسته‌بندی</span>
-            <span class="hero-stat-pill">🎯 ۳ سطح سختی</span>
-            <span class="hero-stat-pill">✨ ۳۳۱ کلمه</span>
+            <span class="hero-stat-pill">@L.StatCategories(GameService.Categories.Count)</span>
+            <span class="hero-stat-pill">@L.StatLevels</span>
+            <span class="hero-stat-pill">@L.StatWords(GameService.TotalWordCount)</span>
         </div>
 
         <div class="action-stack" style="margin-top:6px;">
             <button type="button" class="primary-action-btn" @onclick="GoToGame">
-                🎭 شروع بازی شیاد
+                @L.HomeStartButton
             </button>
 
             <div class="two-col-actions">
                 <button type="button" class="secondary-action-btn" @onclick="OpenSettings">
-                    ⚙️ تنظیمات
+                    @L.HomeSettingsButton
                 </button>
 
                 <button type="button" class="secondary-action-btn" @onclick="GoToAbout">
-                    📖 راهنما
+                    @L.HomeRulesButton
                 </button>
             </div>
+
+            @if (CanInstallPwa)
+            {
+                <button type="button" class="soft-action-btn" @onclick="InstallApp">
+                    @L.InstallAppButton
+                </button>
+            }
         </div>
     </div>
 </div>

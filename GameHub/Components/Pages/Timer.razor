@@ -1,6 +1,6 @@
 @page "/timer"
 @inherits ImposterGame.Pages.Timer
-<PageTitle>زمان بازی</PageTitle>
+<PageTitle>@L.TimerPageTitle</PageTitle>
 
 <NavigationLock ConfirmExternalNavigation="@ShouldConfirmExit"
                 OnBeforeInternalNavigation="@HandleBeforeInternalNavigation" />
@@ -9,12 +9,12 @@
     <div class="game-card timer-card">
         @if (!string.IsNullOrEmpty(PersonStart))
         {
-            <div class="starter-badge">🎤 @PersonStart شروع می‌کند</div>
+            <div class="starter-badge">@L.StartsFirst(PersonStart)</div>
         }
 
         @if (Imposters.Count > 1)
         {
-            <div class="multi-imposter-badge">🕵️ @Imposters.Count شیاد در این دور حضور دارند</div>
+            <div class="multi-imposter-badge">@L.MultiImposterBadge(Imposters.Count)</div>
         }
 
         <!-- Circular Countdown Ring -->
@@ -36,7 +36,7 @@
 
         @if (IsTimeUp)
         {
-            <div class="time-up-banner">⏰ زمان تمام شد! حالا وقت رای‌گیری است</div>
+            <div class="time-up-banner">@L.TimeUpBanner</div>
         }
 
         <div class="action-stack">
@@ -44,13 +44,13 @@
             {
                 <div class="two-col-actions">
                     <button type="button" class="secondary-action-btn" @onclick="TogglePause">
-                        @(isPaused ? "▶️ ادامه" : "⏸️ توقف")
+                        @(isPaused ? L.ResumeButton : L.PauseButton)
                     </button>
 
                     @if (Imposters.Count > 0)
                     {
                         <button type="button" class="soft-action-btn" @onclick="RevealResult">
-                            🎭 نمایش نتیجه
+                            @L.RevealResultShort
                         </button>
                     }
                 </div>
@@ -58,14 +58,14 @@
             else if (Imposters.Count > 0 && !showResult)
             {
                 <button type="button" class="coral-action-btn" @onclick="RevealResult">
-                    @(Imposters.Count > 1 ? "🎭 نمایش شیادها و کلمه" : "🎭 نمایش شیاد و کلمه")
+                    @L.RevealResultFull(Imposters.Count)
                 </button>
             }
 
             @if (Imposters.Count > 0 && showResult)
             {
                 <div class="result-reveal-box">
-                    <span class="result-label">@(Imposters.Count > 1 ? "🕵️ شیادهای این دور" : "🕵️ شیاد این دور")</span>
+                    <span class="result-label">@L.ResultImposterHeader(Imposters.Count)</span>
 
                     <div class="result-imposters-grid">
                         @foreach (var imposter in Imposters)
@@ -82,18 +82,18 @@
 
                     @if (!string.IsNullOrEmpty(SecretWord))
                     {
-                        <div class="result-word-pill">کلمه مخفی: @SecretWord</div>
+                        <div class="result-word-pill">@L.ResultSecretWord(SecretWord)</div>
                     }
 
                     @if (!string.IsNullOrEmpty(SecretCategoryName))
                     {
-                        <div class="result-category">@SecretCategoryIcon @SecretCategoryName • @SecretDifficultyLabel</div>
+                        <div class="result-category">@SecretCategoryIcon @SecretCategoryName • @L.DifficultyLabel(SecretDifficulty)</div>
                     }
                 </div>
             }
 
             <button type="button" class="primary-action-btn" @onclick="StartAgain">
-                🔁 دور جدید بازی
+                @L.NewRoundButton
             </button>
         </div>
     </div>

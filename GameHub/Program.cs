@@ -13,6 +13,8 @@ namespace GameHub
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
             builder.Services.AddRadzenComponents();
+            builder.Services.AddScoped<LocalizationService>();
+            builder.Services.AddScoped<AudioHapticService>();
             builder.Services.AddScoped<WordService>();
             builder.Services.AddScoped<GameService>();
             var app = builder.Build();

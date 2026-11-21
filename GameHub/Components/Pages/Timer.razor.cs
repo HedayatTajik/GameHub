@@ -14,6 +14,8 @@ namespace ImposterGame.Pages
         public int PlayerCount { get; set; }
 
         [Inject] public GameService GameService { get; set; } = default!;
+        [Inject] public LocalizationService L { get; set; } = default!;
+        [Inject] private AudioHapticService AudioHaptic { get; set; } = default!;
         [Inject] private NavigationManager NavigationManager { get; set; } = default!;
         [Inject] private DialogService DialogService { get; set; } = default!;
 
@@ -28,7 +30,7 @@ namespace ImposterGame.Pages
         public string SecretWord { get; private set; } = string.Empty;
         public string SecretCategoryName { get; private set; } = string.Empty;
         public string SecretCategoryIcon { get; private set; } = string.Empty;
-        public string SecretDifficultyLabel { get; private set; } = string.Empty;
+        public WordDifficulty SecretDifficulty { get; private set; } = WordDifficulty.Medium;
 
         public int timeLeft = 180;
         public int totalDurationSeconds = 180;
@@ -63,12 +65,13 @@ namespace ImposterGame.Pages
             "calm";
 
         public string TimerStatusLabel =>
-            IsTimeUp ? "پایان زمان" :
-            isPaused ? "متوقف شده" :
-            "در حال گفتگو";
+            IsTimeUp ? L.TimerStatusDone :
+            isPaused ? L.TimerStatusPaused :
+            L.TimerStatusRunning;
 
         protected override void OnInitialized()
         {
+            GameService.OnSettingsChanged += HandleSettingsChanged;
             InitializeStateFromService();
         }
 
@@ -96,6 +99,11 @@ namespace ImposterGame.Pages
             StartCountdown();
         }
 
+        private void HandleSettingsChanged()
+        {
+            _ = InvokeAsync(StateHasChanged);
+        }
+
         private void InitializeStateFromService()
         {
             PlayerList = GameService.ListNewPlayers();
@@ -103,7 +111,7 @@ namespace ImposterGame.Pages
             SecretWord = GameService.CurrentWord;
             SecretCategoryName = GameService.CurrentCategoryName;
             SecretCategoryIcon = GameService.CurrentCategoryIcon;
-            SecretDifficultyLabel = GameService.GetDifficultyLabel(GameService.CurrentDifficulty);
+            SecretDifficulty = GameService.CurrentDifficulty;
 
             if (GameService.HasActiveGame)
             {
@@ -155,6 +163,15 @@ namespace ImposterGame.Pages
                     {
                         timeLeft--;
                         await InvokeAsync(StateHasChanged);
+
+                        if (timeLeft == 0)
+                        {
+                            await AudioHaptic.PlayTimeUpAsync(GameService.Settings.SoundEnabled);
+                        }
+                        else if (timeLeft <= 10)
+                        {
+                            await AudioHaptic.PlayTickAsync(GameService.Settings.SoundEnabled, timeLeft);
+                        }
                     }
                 }
             }
@@ -172,11 +189,12 @@ namespace ImposterGame.Pages
             }
         }
 
-        public void TogglePause()
+        public async Task TogglePause()
         {
             if (!IsTimeUp)
             {
                 isPaused = !isPaused;
+                await AudioHaptic.PlayClickAsync(GameService.Settings.SoundEnabled);
             }
         }
 
@@ -185,10 +203,10 @@ namespace ImposterGame.Pages
             if (!IsTimeUp)
             {
                 var confirmed = await ConfirmActionAsync(
-                    "زمان بازی هنوز تمام نشده است. آیا می‌خواهید شیاد و کلمه نمایش داده شود؟",
-                    "🎭 نمایش نتیجه",
-                    "بله، نمایش بده",
-                    "ادامه بازی");
+                    L.ConfirmRevealMessage,
+                    L.ConfirmRevealTitle,
+                    L.ConfirmRevealOk,
+                    L.ConfirmContinue);
 
                 if (!confirmed)
                 {
@@ -198,6 +216,7 @@ namespace ImposterGame.Pages
 
             showResult = true;
             isPaused = true;
+            await AudioHaptic.PlayRevealResultAsync(GameService.Settings.SoundEnabled);
         }
 
         public async Task StartAgain()
@@ -205,10 +224,10 @@ namespace ImposterGame.Pages
             if (ShouldConfirmExit)
             {
                 var confirmed = await ConfirmActionAsync(
-                    "بازی هنوز در حال اجراست. آیا مطمئن هستید که می‌خواهید بازی را متوقف کنید؟",
-                    "⚠️ پایان بازی",
-                    "بله، شروع مجدد",
-                    "ادامه بازی");
+                    L.ConfirmRestartMessage,
+                    L.ConfirmRestartTitle,
+                    L.ConfirmRestartOk,
+                    L.ConfirmContinue);
 
                 if (!confirmed)
                 {
@@ -219,6 +238,7 @@ namespace ImposterGame.Pages
             _isExitConfirmed = true;
             _timerCts?.Cancel();
             GameService.ResetRound();
+            await AudioHaptic.PlayClickAsync(GameService.Settings.SoundEnabled);
             NavigationManager.NavigateTo("/impostergame");
         }
 
@@ -236,10 +256,10 @@ namespace ImposterGame.Pages
             }
 
             var confirmed = await ConfirmActionAsync(
-                "بازی در حال اجراست. آیا مطمئن هستید که می‌خواهید از بازی خارج شوید؟",
-                "⚠️ خروج از بازی",
-                "بله، خروج از بازی",
-                "ادامه بازی");
+                L.ConfirmExitMessage,
+                L.ConfirmExitTitle,
+                L.ConfirmExitOk,
+                L.ConfirmContinue);
 
             if (!confirmed)
             {
@@ -301,6 +321,7 @@ namespace ImposterGame.Pages
             }
 
             _disposed = true;
+            GameService.OnSettingsChanged -= HandleSettingsChanged;
             _timerCts?.Cancel();
             _timerCts?.Dispose();
         }

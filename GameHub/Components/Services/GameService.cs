@@ -38,6 +38,8 @@ namespace ImposterGame.Services
 
         private readonly WordService _wordService;
         private readonly IJSRuntime _jsRuntime;
+        private readonly LocalizationService _localization;
+        private readonly AudioHapticService _audioHaptic;
         private const string LocalStorageKey = "ImposterGamePlayers";
         private const string SettingsStorageKey = "ImposterGameSettings";
 
@@ -46,7 +48,8 @@ namespace ImposterGame.Services
 
         public List<Player> Players { get; } = new();
         public GameSettings Settings { get; private set; } = new();
-        public IReadOnlyList<WordCategory> Categories => _wordService.Categories;
+        public IReadOnlyList<WordCategory> Categories => _wordService.GetCategories(Settings.Language);
+        public int TotalWordCount => _wordService.GetTotalWordCount(Settings.Language);
 
         public event Action? OnSettingsChanged;
         public event Action? OnGameStateChanged;
@@ -60,18 +63,16 @@ namespace ImposterGame.Services
 
         public bool HasActiveGame => Players.Count >= MinPlayers && Players.Any(p => p.IsImposter);
 
-        public static string GetDifficultyLabel(WordDifficulty difficulty) => difficulty switch
-        {
-            WordDifficulty.Easy => "🟢 آسان",
-            WordDifficulty.Medium => "🟡 متوسط",
-            WordDifficulty.Hard => "🔴 سخت",
-            _ => "🟡 متوسط"
-        };
-
-        public GameService(WordService wordService, IJSRuntime jsRuntime)
+        public GameService(
+            WordService wordService,
+            IJSRuntime jsRuntime,
+            LocalizationService localization,
+            AudioHapticService audioHaptic)
         {
             _wordService = wordService;
             _jsRuntime = jsRuntime;
+            _localization = localization;
+            _audioHaptic = audioHaptic;
         }
 
         public int GetMaxImposters() => Players.Count >= MinPlayersForTwoImposters ? 2 : 1;
@@ -89,7 +90,7 @@ namespace ImposterGame.Services
         }
 
         public int GetActiveWordPoolCount() =>
-            _wordService.GetWordCount(Settings.Difficulty, Settings.SelectedCategoryIds);
+            _wordService.GetWordCount(Settings.Difficulty, Settings.SelectedCategoryIds, Settings.Language);
 
         /// <summary>
         /// Assigns roles to all players: 1 or 2 imposters based on settings, others receive the word.
@@ -98,7 +99,7 @@ namespace ImposterGame.Services
         {
             if (Players.Count < MinPlayers) return;
 
-            var entry = _wordService.GetRandomWord(Settings.Difficulty, Settings.SelectedCategoryIds);
+            var entry = _wordService.GetRandomWord(Settings.Difficulty, Settings.SelectedCategoryIds, Settings.Language);
             CurrentWord = entry.Word;
             CurrentCategoryName = entry.CategoryName;
             CurrentCategoryIcon = entry.CategoryIcon;
@@ -146,6 +147,12 @@ namespace ImposterGame.Services
             }
 
             OnGameStateChanged?.Invoke();
+        }
+
+        public async Task ToggleDarkModeAsync()
+        {
+            Settings.DarkMode = !Settings.DarkMode;
+            await SaveSettingsAsync();
         }
 
         public async Task LoadPlayersAsync()
@@ -207,6 +214,7 @@ namespace ImposterGame.Services
         {
             if (_hasLoadedSettings)
             {
+                await ApplyClientPreferencesAsync();
                 return;
             }
 
@@ -218,7 +226,13 @@ namespace ImposterGame.Services
                     var stored = JsonSerializer.Deserialize<GameSettings>(json);
                     if (stored is not null)
                     {
-                        var validCategoryIds = new HashSet<string>(Categories.Select(c => c.Id), StringComparer.OrdinalIgnoreCase);
+                        stored.Language = LocalizationService.NormalizeLanguage(stored.Language);
+                        _localization.SetLanguage(stored.Language);
+
+                        var validCategoryIds = new HashSet<string>(
+                            _wordService.GetCategories(stored.Language).Select(c => c.Id),
+                            StringComparer.OrdinalIgnoreCase);
+
                         stored.Difficulty = Enum.IsDefined(stored.Difficulty)
                             ? stored.Difficulty
                             : WordDifficulty.Medium;
@@ -232,7 +246,9 @@ namespace ImposterGame.Services
                     }
                 }
 
+                _localization.SetLanguage(Settings.Language);
                 _hasLoadedSettings = true;
+                await ApplyClientPreferencesAsync();
                 OnSettingsChanged?.Invoke();
             }
             catch (InvalidOperationException)
@@ -251,6 +267,9 @@ namespace ImposterGame.Services
 
         public async Task SaveSettingsAsync()
         {
+            Settings.Language = LocalizationService.NormalizeLanguage(Settings.Language);
+            _localization.SetLanguage(Settings.Language);
+
             if (!Enum.IsDefined(Settings.Difficulty))
             {
                 Settings.Difficulty = WordDifficulty.Medium;
@@ -258,6 +277,8 @@ namespace ImposterGame.Services
 
             Settings.ImposterCount = Math.Clamp(Settings.ImposterCount, 1, 2);
             Settings.RoundDurationMinutes = Math.Clamp(Settings.RoundDurationMinutes, MinRoundMinutes, MaxRoundMinutes);
+
+            await ApplyClientPreferencesAsync();
             OnSettingsChanged?.Invoke();
 
             try
@@ -277,6 +298,14 @@ namespace ImposterGame.Services
             {
                 Console.WriteLine($"Error saving settings: {ex.Message}");
             }
+        }
+
+        private async Task ApplyClientPreferencesAsync()
+        {
+            await _audioHaptic.ApplyPreferencesAsync(
+                Settings.DarkMode,
+                _localization.Language,
+                _localization.Direction);
         }
 
         private async Task SavePlayersAsync()
@@ -306,9 +335,6 @@ namespace ImposterGame.Services
             return Players.Any(p => string.Equals(p.Name.Trim(), trimmed, StringComparison.OrdinalIgnoreCase));
         }
 
-        /// <summary>
-        /// Removes a player from the game.
-        /// </summary>
         public async Task<List<Player>> DeleteUser(Player player)
         {
             if (player is not null)
@@ -334,19 +360,10 @@ namespace ImposterGame.Services
             await SavePlayersAsync();
         }
 
-        /// <summary>
-        /// Returns the current list of players.
-        /// </summary>
         public List<Player> ListNewPlayers() => Players;
 
-        /// <summary>
-        /// Returns the first imposter player if assigned, otherwise null.
-        /// </summary>
         public Player? GetImposter() => Players.FirstOrDefault(p => p.IsImposter);
 
-        /// <summary>
-        /// Returns all assigned imposter players.
-        /// </summary>
         public List<Player> GetImposters() => Players.Where(p => p.IsImposter).ToList();
     }
 }
