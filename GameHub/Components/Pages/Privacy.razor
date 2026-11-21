@@ -1,0 +1,84 @@
+@page "/privacy"
+@implements IDisposable
+@inject NavigationManager Navigation
+@inject ImposterGame.Services.GameService GameService
+@inject ImposterGame.Services.LocalizationService L
+
+<PageTitle>@L.T("حریم خصوصی", "Datenschutz", "Privacy Policy")</PageTitle>
+
+<div class="stage-container stage-lg page-stack">
+    <div class="game-card">
+        <h2 style="margin:0; font-family:var(--font-display); font-size:clamp(1.45rem, 4.5vw, 1.9rem); font-weight:var(--display-weight); color:var(--text-main); text-align:center;">
+            @L.T("🔒 سیاست حریم خصوصی", "🔒 Datenschutzerklärung", "🔒 Privacy Policy")
+        </h2>
+
+        @if (L.Language == "de")
+        {
+            <div class="about-section">
+                <h4>1. Keine Datenerhebung</h4>
+                <strong>GameHub (Imposter Spiel)</strong> benötigt keine Registrierung, kein Benutzerkonto und erhebt keine personenbezogenen Daten auf externen Servern.
+            </div>
+            <div class="about-section">
+                <h4>2. Lokale Speicherung auf deinem Gerät</h4>
+                Spielernamen, ausgewählte Avatare und Spieleinstellungen (Sprache, Dark Mode, Schwierigkeitsgrad, Kategorien, Timer) werden ausschließlich lokal im <code>localStorage</code> deines Browsers bzw. Geräts gespeichert und können jederzeit gelöscht werden.
+            </div>
+            <div class="about-section">
+                <h4>3. Keine Werbung & kein Tracking</h4>
+                Diese App verwendet keine Werbenetzwerke, keine Analyse-Tracker und gibt keinerlei Daten an Dritte weiter.
+            </div>
+        }
+        else if (L.Language == "en")
+        {
+            <div class="about-section">
+                <h4>1. No Personal Data Collection</h4>
+                <strong>GameHub (Imposter Game)</strong> requires no account or sign-in and does not collect or store personal data on external servers.
+            </div>
+            <div class="about-section">
+                <h4>2. Local Device Storage Only</h4>
+                Player names, chosen avatars, and game settings (language, dark mode, difficulty, categories, timer) are stored exclusively in your browser's local storage on your own device and can be cleared at any time.
+            </div>
+            <div class="about-section">
+                <h4>3. No Ads or Tracking</h4>
+                This app contains no third-party advertising networks, no analytics trackers, and shares zero data with third parties.
+            </div>
+        }
+        else
+        {
+            <div class="about-section">
+                <h4>۱. عدم جمع‌آوری اطلاعات شخصی</h4>
+                برنامه <strong>بازی شیاد (GameHub)</strong> نیازی به ثبت‌نام یا حساب کاربری ندارد و هیچ‌گونه اطلاعات شخصی کاربران را روی سرورهای خارجی ذخیره نمی‌کند.
+            </div>
+            <div class="about-section">
+                <h4>۲. ذخیره‌سازی فقط روی دستگاه شما</h4>
+                نام بازیکنان، آواتارهای انتخابی و تنظیمات بازی (زبان، حالت شب، سطح سختی، دسته‌بندی‌ها و زمان) فقط به‌صورت محلی در حافظه مرورگر (<code>localStorage</code>) دستگاه خودتان ذخیره می‌شوند.
+            </div>
+            <div class="about-section">
+                <h4>۳. بدون تبلیغات و ردیابی</h4>
+                این برنامه هیچ‌گونه ردیاب تبلیغاتی یا ابزار تحلیل رفتار کاربر ندارد و اطلاعاتی را با اشخاص ثالث به اشتراک نمی‌گذارد.
+            </div>
+        }
+
+        <div class="about-cta-wrap">
+            <button type="button" class="primary-action-btn" @onclick='() => Navigation.NavigateTo("/")'>
+                @L.BackHomeButton
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        GameService.OnSettingsChanged += HandleSettingsChanged;
+    }
+
+    private void HandleSettingsChanged()
+    {
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        GameService.OnSettingsChanged -= HandleSettingsChanged;
+    }
+}

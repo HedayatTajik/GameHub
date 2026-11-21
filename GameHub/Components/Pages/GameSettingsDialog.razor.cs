@@ -5,19 +5,27 @@ using Radzen;
 
 namespace ImposterGame.Pages
 {
-    public partial class GameSettingsDialog : ComponentBase
+    public partial class GameSettingsDialog : ComponentBase, IDisposable
     {
         [Inject] public GameService GameService { get; set; } = default!;
         [Inject] public LocalizationService L { get; set; } = default!;
         [Inject] private AudioHapticService AudioHaptic { get; set; } = default!;
         [Inject] private DialogService DialogService { get; set; } = default!;
+        [Inject] private NavigationManager NavigationManager { get; set; } = default!;
 
-        protected bool CanInstallPwa { get; private set; }
+        protected bool CanInstallPwa => AudioHaptic.CanInstallPwa;
+        protected bool IsStandalone => AudioHaptic.IsStandalone;
+        protected bool ShowIosInstallHint => !CanInstallPwa && AudioHaptic.IsIosInstallHintEligible;
         protected GameSettings Settings => GameService.Settings;
         protected IReadOnlyList<WordCategory> Categories => GameService.Categories;
         protected bool CanUseTwoImposters => GameService.Players.Count >= GameService.MinPlayersForTwoImposters;
         protected int EffectiveImposterCount => GameService.GetEffectiveImposterCount();
         protected int ActiveWordCount => GameService.GetActiveWordPoolCount();
+
+        protected override void OnInitialized()
+        {
+            AudioHaptic.OnPwaStateChanged += HandlePwaStateChanged;
+        }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
@@ -25,9 +33,14 @@ namespace ImposterGame.Pages
             {
                 await GameService.LoadPlayersAsync();
                 await GameService.LoadSettingsAsync();
-                CanInstallPwa = await AudioHaptic.CanInstallPwaAsync();
+                await AudioHaptic.EnsurePwaSubscribedAsync();
                 StateHasChanged();
             }
+        }
+
+        private void HandlePwaStateChanged()
+        {
+            _ = InvokeAsync(StateHasChanged);
         }
 
         protected async Task SetLanguage(string language)
@@ -125,11 +138,13 @@ namespace ImposterGame.Pages
 
         protected async Task InstallApp()
         {
-            var installed = await AudioHaptic.PromptInstallPwaAsync();
-            if (installed)
-            {
-                CanInstallPwa = false;
-            }
+            await AudioHaptic.PromptInstallPwaAsync();
+        }
+
+        protected void OpenPrivacyPage()
+        {
+            DialogService.Close(false);
+            NavigationManager.NavigateTo("/privacy");
         }
 
         protected void CloseDialog()
@@ -146,5 +161,10 @@ namespace ImposterGame.Pages
             Resizable = false,
             CssClass = "mobile-settings-dialog"
         };
+
+        public void Dispose()
+        {
+            AudioHaptic.OnPwaStateChanged -= HandlePwaStateChanged;
+        }
     }
 }

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-theme="light">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#FAF7F2" />
+    <title>GameHub – Offline</title>
+    <style>
+        :root {
+            --bg: linear-gradient(180deg, #faf7f2 0%, #f5f0e6 100%);
+            --surface: #ffffff;
+            --text: #1e1b2e;
+            --muted: #6b657f;
+            --border: rgba(45, 38, 75, 0.1);
+        }
+        html[data-theme="dark"] {
+            --bg: linear-gradient(180deg, #13111c 0%, #191627 100%);
+            --surface: #1f1c30;
+            --text: #f4f2ff;
+            --muted: #a6a0be;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Vazirmatn', 'Segoe UI', Tahoma, system-ui, sans-serif;
+        }
+        .card {
+            width: 100%;
+            max-width: 420px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 28px 22px;
+            text-align: center;
+            box-shadow: 0 12px 34px rgba(0, 0, 0, 0.12);
+        }
+        .icon {
+            width: 84px;
+            height: 84px;
+            margin: 0 auto 14px;
+            border-radius: 24px;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.3rem;
+        }
+        h1 { margin: 0 0 10px; font-size: 1.45rem; }
+        p { margin: 0 0 22px; color: var(--muted); line-height: 1.7; font-size: 0.98rem; }
+        button {
+            width: 100%;
+            min-height: 52px;
+            border: none;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+            color: #fff;
+            font-size: 1.05rem;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+        }
+        button:active { transform: scale(0.98); }
+    </style>
+</head>
+<body>
+    <main class="card">
+        <div class="icon">📡</div>
+        <h1 id="title">اتصال اینترنت برقرار نیست</h1>
+        <p id="desc">برای اجرای بازی شیاد به اینترنت نیاز است. لطفاً اتصال خود را بررسی کرده و دوباره تلاش کنید.</p>
+        <button id="retryBtn" type="button" onclick="window.location.reload()">🔄 تلاش مجدد</button>
+    </main>
+
+    <script>
+        (function () {
+            try {
+                var raw = localStorage.getItem('ImposterGameSettings');
+                var lang = 'fa';
+                if (raw) {
+                    var s = JSON.parse(raw);
+                    if (s.DarkMode) {
+                        document.documentElement.setAttribute('data-theme', 'dark');
+                    }
+                    lang = (s.Language || 'fa').toLowerCase();
+                }
+                if (lang === 'de') {
+                    document.documentElement.lang = 'de';
+                    document.documentElement.dir = 'ltr';
+                    document.getElementById('title').textContent = 'Keine Internetverbindung';
+                    document.getElementById('desc').textContent = 'Für GameHub wird eine aktive Verbindung benötigt. Bitte prüfe dein Netz und versuche es erneut.';
+                    document.getElementById('retryBtn').textContent = '🔄 Erneut versuchen';
+                } else if (lang === 'en') {
+                    document.documentElement.lang = 'en';
+                    document.documentElement.dir = 'ltr';
+                    document.getElementById('title').textContent = 'You are offline';
+                    document.getElementById('desc').textContent = 'GameHub needs an internet connection to play. Please check your connection and try again.';
+                    document.getElementById('retryBtn').textContent = '🔄 Try Again';
+                }
+            } catch (e) { }
+
+            window.addEventListener('online', function () {
+                window.location.reload();
+            });
+        })();
+    </script>
+</body>
+</html>

@@ -177,6 +177,16 @@ namespace ImposterGame.Services
         public string SettingsHintTitle => T("💡 راهنمایی برای شیاد", "💡 Kategorie-Hinweis", "💡 Imposter Hint");
         public string SettingsHintDesc => T("شیاد فقط نام دسته‌بندی کلمه را می‌بیند", "Imposter sieht nur die Kategorie des Wortes", "Imposter sees only the word's category");
         public string InstallAppButton => T("📲 نصب اپلیکیشن روی گوشی", "📲 App auf Startbildschirm installieren", "📲 Install App on Home Screen");
+        public string InstallAppShort => T("نصب اپ", "Installieren", "Install");
+        public string IosInstallHint => T(
+            "📱 نصب روی آیفون/آیپد: دکمه Share (⎋) را در سافاری بزنید و «Add to Home Screen» را انتخاب کنید.",
+            "📱 Installation auf iPhone/iPad: In Safari auf Teilen (⎋) tippen und „Zum Home-Bildschirm“ wählen.",
+            "📱 Install on iPhone/iPad: Tap Share (⎋) in Safari and select “Add to Home Screen”.");
+        public string BrowserInstallHint => T(
+            "📲 برای نصب به عنوان اپلیکیشن: در کروم یا اج از منوی مرورگر گزینه «Install app / افزودن به صفحه اصلی» را انتخاب کنید.",
+            "📲 Als App installieren: In Chrome/Edge einfach auf das Installieren-Symbol (⊕) in der Adressleiste oder im Menü auf „App installieren“ tippen.",
+            "📲 Install as an app: In Chrome/Edge, click the install icon (⊕) in the address bar or choose “Install app” from the browser menu.");
+        public string PrivacyPolicyLink => T("🔒 حریم خصوصی", "🔒 Datenschutz", "🔒 Privacy Policy");
         public string SaveAndCloseButton => T("✓ تأیید و بستن", "✓ Fertig & Schließen", "✓ Save & Close");
 
         public string BuildSettingsSummary(GameSettings settings, int effectiveImposters, int wordPoolCount)

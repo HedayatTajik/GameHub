@@ -23,7 +23,6 @@ namespace GameHub
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
@@ -31,6 +30,43 @@ namespace GameHub
             app.UseHttpsRedirection();
 
             app.UseAntiforgery();
+
+            // Serve Android Digital Asset Links for TWA (supports Azure App Settings override or wwwroot file)
+            app.MapGet("/.well-known/assetlinks.json", (IConfiguration config, IWebHostEnvironment env) =>
+            {
+                var packageName = config["PWA:PackageName"];
+                var fingerprintsRaw = config["PWA:Sha256Fingerprints"];
+
+                if (!string.IsNullOrWhiteSpace(packageName) && !string.IsNullOrWhiteSpace(fingerprintsRaw))
+                {
+                    var fingerprints = fingerprintsRaw
+                        .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+                    var payload = new[]
+                    {
+                        new
+                        {
+                            relation = new[] { "delegate_permission/common.handle_all_urls" },
+                            target = new
+                            {
+                                @namespace = "android_app",
+                                package_name = packageName,
+                                sha256_cert_fingerprints = fingerprints
+                            }
+                        }
+                    };
+
+                    return Results.Json(payload);
+                }
+
+                var filePath = Path.Combine(env.WebRootPath, ".well-known", "assetlinks.json");
+                if (File.Exists(filePath))
+                {
+                    return Results.File(filePath, "application/json");
+                }
+
+                return Results.NotFound();
+            });
 
             app.MapStaticAssets();
             app.MapRazorComponents<App>()

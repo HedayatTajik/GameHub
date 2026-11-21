@@ -1,6 +1,7 @@
 (function () {
     let audioCtx = null;
     let deferredInstallPrompt = null;
+    const pwaSubscribers = new Set();
 
     function getAudioContext() {
         const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -46,6 +47,21 @@
         }
     }
 
+    function isStandaloneMode() {
+        return window.matchMedia('(display-mode: standalone)').matches ||
+            window.navigator.standalone === true;
+    }
+
+    function notifySubscribers() {
+        const canInstall = deferredInstallPrompt !== null && !isStandaloneMode();
+        const standalone = isStandaloneMode();
+        pwaSubscribers.forEach((dotNetRef) => {
+            dotNetRef.invokeMethodAsync('NotifyPwaInstallState', canInstall, standalone).catch(() => {
+                pwaSubscribers.delete(dotNetRef);
+            });
+        });
+    }
+
     // Unlock audio context on first user gesture for mobile Safari/Chrome
     ['pointerdown', 'touchstart', 'keydown'].forEach(evt => {
         window.addEventListener(evt, () => {
@@ -55,21 +71,29 @@
         }, { passive: true });
     });
 
-    // Capture PWA install prompt when eligible
+    // Capture PWA install prompt and notify Blazor immediately
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredInstallPrompt = e;
+        notifySubscribers();
     });
 
     window.addEventListener('appinstalled', () => {
         deferredInstallPrompt = null;
+        notifySubscribers();
     });
 
-    // Register lightweight PWA Service Worker
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/service-worker.js').catch(() => {});
-        });
+    // Register lightweight PWA Service Worker reliably
+    function registerServiceWorker() {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.js', { scope: '/' }).catch(() => {});
+        }
+    }
+
+    if (document.readyState === 'complete') {
+        registerServiceWorker();
+    } else {
+        window.addEventListener('load', registerServiceWorker);
     }
 
     window.gameHub = {
@@ -115,7 +139,6 @@
         },
 
         playRevealResult: function () {
-            // Short playful mystery-to-reveal fanfare
             playTone(392.0, 0.12, 'triangle', 0.13, 0);
             playTone(493.88, 0.12, 'triangle', 0.14, 0.1);
             playTone(587.33, 0.14, 'triangle', 0.15, 0.2);
@@ -123,8 +146,28 @@
             vibrate([30, 30, 110]);
         },
 
+        subscribePwaInstall: function (dotNetRef) {
+            pwaSubscribers.add(dotNetRef);
+            notifySubscribers();
+        },
+
+        unsubscribePwaInstall: function (dotNetRef) {
+            pwaSubscribers.delete(dotNetRef);
+        },
+
         canInstallPwa: function () {
-            return deferredInstallPrompt !== null;
+            return deferredInstallPrompt !== null && !isStandaloneMode();
+        },
+
+        isStandalone: function () {
+            return isStandaloneMode();
+        },
+
+        isIosInstallHintEligible: function () {
+            const ua = window.navigator.userAgent || '';
+            const isIos = /iphone|ipad|ipod/i.test(ua) ||
+                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            return isIos && !isStandaloneMode();
         },
 
         promptInstallPwa: async function () {
@@ -133,9 +176,11 @@
             try {
                 const choice = await deferredInstallPrompt.userChoice;
                 deferredInstallPrompt = null;
+                notifySubscribers();
                 return choice && choice.outcome === 'accepted';
             } catch {
                 deferredInstallPrompt = null;
+                notifySubscribers();
                 return false;
             }
         }

@@ -12,7 +12,7 @@ namespace GameHub.Components.Pages
         [Inject] public LocalizationService L { get; set; } = default!;
         [Inject] private AudioHapticService AudioHaptic { get; set; } = default!;
 
-        protected bool CanInstallPwa { get; private set; }
+        protected bool CanInstallPwa => AudioHaptic.CanInstallPwa;
 
         protected override void OnInitialized()
         {
@@ -21,7 +21,8 @@ namespace GameHub.Components.Pages
                 GameService.ResetRound();
             }
 
-            GameService.OnSettingsChanged += HandleSettingsChanged;
+            GameService.OnSettingsChanged += HandleStateChanged;
+            AudioHaptic.OnPwaStateChanged += HandleStateChanged;
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -29,12 +30,12 @@ namespace GameHub.Components.Pages
             if (firstRender)
             {
                 await GameService.LoadSettingsAsync();
-                CanInstallPwa = await AudioHaptic.CanInstallPwaAsync();
+                await AudioHaptic.EnsurePwaSubscribedAsync();
                 StateHasChanged();
             }
         }
 
-        private void HandleSettingsChanged()
+        private void HandleStateChanged()
         {
             _ = InvokeAsync(StateHasChanged);
         }
@@ -58,16 +59,13 @@ namespace GameHub.Components.Pages
 
         private async Task InstallApp()
         {
-            var installed = await AudioHaptic.PromptInstallPwaAsync();
-            if (installed)
-            {
-                CanInstallPwa = false;
-            }
+            await AudioHaptic.PromptInstallPwaAsync();
         }
 
         public void Dispose()
         {
-            GameService.OnSettingsChanged -= HandleSettingsChanged;
+            GameService.OnSettingsChanged -= HandleStateChanged;
+            AudioHaptic.OnPwaStateChanged -= HandleStateChanged;
         }
     }
 }

@@ -170,9 +170,25 @@
             @L.InstallAppButton
         </button>
     }
+    else if (ShowIosInstallHint)
+    {
+        <div class="settings-section">
+            <div class="settings-hint">@L.IosInstallHint</div>
+        </div>
+    }
+    else if (!IsStandalone)
+    {
+        <div class="settings-section">
+            <div class="settings-hint">@L.BrowserInstallHint</div>
+        </div>
+    }
 
     <!-- Done Button -->
     <button type="button" class="primary-action-btn" @onclick="CloseDialog">
         @L.SaveAndCloseButton
+    </button>
+
+    <button type="button" class="ghost-action-btn" @onclick="OpenPrivacyPage">
+        @L.PrivacyPolicyLink
     </button>
 </div>

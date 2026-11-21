@@ -2,6 +2,7 @@
 @inject DialogService DialogService
 @inject ImposterGame.Services.GameService GameService
 @inject ImposterGame.Services.LocalizationService L
+@inject ImposterGame.Services.AudioHapticService AudioHaptic
 @inject NavigationManager NavigationManager
 
 <header class="app-topbar">
@@ -28,6 +29,17 @@
         </nav>
 
         <div class="topbar-end">
+            @if (AudioHaptic.CanInstallPwa && ShowSettingsButton)
+            {
+                <button type="button"
+                        class="icon-btn"
+                        aria-label="@L.InstallAppButton"
+                        title="@L.InstallAppButton"
+                        @onclick="InstallPwa">
+                    📲
+                </button>
+            }
+
             <button type="button"
                     class="icon-btn"
                     aria-label="@L.ToggleDarkModeLabel"
@@ -67,6 +79,13 @@
             <span>📖</span>
             <span>@L.NavAbout</span>
         </NavLink>
+        @if (AudioHaptic.CanInstallPwa && ShowSettingsButton)
+        {
+            <button type="button" class="mobile-nav-link mobile-nav-action" @onclick="InstallPwaFromMenu">
+                <span>📲</span>
+                <span>@L.InstallAppShort</span>
+            </button>
+        }
         @if (ShowSettingsButton)
         {
             <button type="button" class="mobile-nav-link mobile-nav-action" @onclick="OpenSettingsFromMenu">
@@ -96,6 +115,7 @@
     {
         GameService.OnGameStateChanged += HandleStateChanged;
         GameService.OnSettingsChanged += HandleStateChanged;
+        AudioHaptic.OnPwaStateChanged += HandleStateChanged;
         NavigationManager.LocationChanged += HandleLocationChanged;
     }
 
@@ -104,6 +124,7 @@
         if (firstRender)
         {
             await GameService.LoadSettingsAsync();
+            await AudioHaptic.EnsurePwaSubscribedAsync();
             StateHasChanged();
         }
     }
@@ -134,6 +155,17 @@
         await GameService.ToggleDarkModeAsync();
     }
 
+    private async Task InstallPwa()
+    {
+        await AudioHaptic.PromptInstallPwaAsync();
+    }
+
+    private async Task InstallPwaFromMenu()
+    {
+        collapseNavMenu = true;
+        await AudioHaptic.PromptInstallPwaAsync();
+    }
+
     private async Task OpenSettingsFromMenu()
     {
         collapseNavMenu = true;
@@ -151,6 +183,7 @@
     {
         GameService.OnGameStateChanged -= HandleStateChanged;
         GameService.OnSettingsChanged -= HandleStateChanged;
+        AudioHaptic.OnPwaStateChanged -= HandleStateChanged;
         NavigationManager.LocationChanged -= HandleLocationChanged;
     }
 }
