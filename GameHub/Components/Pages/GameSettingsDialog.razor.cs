@@ -139,7 +139,7 @@ namespace ImposterGame.Pages
 
         public static DialogOptions CreateDialogOptions() => new()
         {
-            Width = "min(94vw, 460px)",
+            Width = "min(94vw, 540px)",
             CloseDialogOnOverlayClick = true,
             ShowClose = true,
             Draggable = false,

@@ -229,7 +229,7 @@ h1:focus {
 .hero-title {
     margin: 2px 0 0;
     font-family: var(--font-display);
-    font-size: 2.35rem;
+    font-size: clamp(1.95rem, 6.8vw, 2.75rem);
     font-weight: var(--display-weight);
     color: var(--text-main);
     line-height: 1.15;
@@ -237,10 +237,10 @@ h1:focus {
 
 .hero-subtitle {
     margin: 0;
-    font-size: 0.98rem;
+    font-size: clamp(0.92rem, 2.6vw, 1.04rem);
     color: var(--text-muted);
     line-height: 1.75;
-    max-width: 340px;
+    max-width: 420px;
 }
 
 .hero-stats-row {
@@ -263,7 +263,7 @@ h1:focus {
 .two-col-actions {
     width: 100%;
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(136px, 1fr));
     gap: 10px;
 }
 
@@ -808,8 +808,8 @@ h1:focus {
 
 .timer-ring-wrap {
     position: relative;
-    width: 214px;
-    height: 214px;
+    width: clamp(180px, 54vw, 240px);
+    height: clamp(180px, 54vw, 240px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -862,7 +862,7 @@ h1:focus {
 }
 
 .timer-display {
-    font-size: 2.7rem;
+    font-size: clamp(2.15rem, 9vw, 3rem);
     font-weight: 800;
     font-variant-numeric: tabular-nums;
     letter-spacing: 1px;
@@ -1284,6 +1284,256 @@ html[data-theme="dark"] .difficulty-btn.medium.active {
 /* Radzen Switch brand polish */
 .rz-switch.rz-switch-checked .rz-switch-circle {
     background-color: #4f46e5 !important;
+}
+
+/* =========================================================
+   Responsive Containers & Adaptive Multi-Device Layouts
+   ========================================================= */
+.stage-container {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.stage-container.stage-md {
+    max-width: 580px;
+}
+
+.stage-container.stage-lg {
+    max-width: 860px;
+}
+
+.lobby-layout {
+    width: 100%;
+    max-width: 520px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    animation: softFadeUp 0.25s ease-out;
+}
+
+.about-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.about-cta-wrap {
+    width: 100%;
+    max-width: 360px;
+    margin: 4px auto 0;
+}
+
+/* Focus Accessibility */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+    outline: 2.5px solid var(--brand);
+    outline-offset: 2px;
+}
+
+/* Extra-small phones (<= 375px, e.g., iPhone SE / compact Android) */
+@media (max-width: 375px) {
+    .game-card {
+        padding: 14px;
+        border-radius: 20px;
+        gap: 12px;
+    }
+
+    .hero-card {
+        padding: 20px 14px 18px;
+    }
+
+    .hero-badge-glow {
+        width: 84px;
+        height: 84px;
+        border-radius: 24px;
+    }
+
+    .hero-badge-glow img {
+        width: 56px;
+        height: 56px;
+    }
+
+    .primary-action-btn,
+    .success-action-btn,
+    .coral-action-btn,
+    .secondary-action-btn,
+    .soft-action-btn,
+    .hold-reveal-btn {
+        min-height: 48px;
+        padding: 10px 12px;
+        font-size: 0.96rem;
+        border-radius: 14px;
+    }
+
+    .avatar-grid {
+        grid-template-columns: repeat(auto-fill, minmax(46px, 1fr));
+        gap: 8px;
+        max-height: 150px;
+    }
+
+    .difficulty-btn,
+    .lang-btn {
+        font-size: 0.8rem;
+        padding: 4px;
+        min-height: 42px;
+    }
+
+    .chip-btn {
+        font-size: 0.82rem;
+        padding: 5px 10px;
+    }
+
+    .reveal-avatar {
+        width: 84px;
+        height: 84px;
+    }
+
+    .mystery-card-back,
+    .card-reveal-box {
+        min-height: 132px;
+        padding: 18px 14px;
+    }
+}
+
+/* Tablets (>= 700px) */
+@media (min-width: 700px) {
+    .game-card {
+        padding: 26px;
+        gap: 18px;
+    }
+
+    .hero-card {
+        padding: 36px 32px 30px;
+    }
+
+    .about-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+    }
+
+    .avatar-grid {
+        grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+        gap: 11px;
+        max-height: 220px;
+    }
+}
+
+/* Large Tablets & Desktop (>= 860px): 2-Column Bento Lobby */
+@media (min-width: 860px) {
+    .lobby-layout {
+        max-width: 960px;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+        gap: 18px;
+        align-items: start;
+    }
+
+    .lobby-span-full {
+        grid-column: 1 / -1;
+    }
+
+    .lobby-players-card .player-list {
+        max-height: 360px;
+        overflow-y: auto;
+        padding-inline-end: 4px;
+    }
+
+    .lobby-add-card .avatar-grid {
+        max-height: 310px;
+        grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    }
+
+    .stage-container {
+        max-width: 540px;
+    }
+
+    .stage-container.stage-md {
+        max-width: 640px;
+    }
+}
+
+/* Landscape Phones (short viewport height) */
+@media (max-height: 540px) and (orientation: landscape) {
+    .game-card {
+        padding: 14px 18px;
+        gap: 10px;
+    }
+
+    .reveal-avatar {
+        width: 68px;
+        height: 68px;
+    }
+
+    .mystery-card-back,
+    .card-reveal-box {
+        min-height: 110px;
+        padding: 14px;
+    }
+
+    .timer-ring-wrap {
+        width: 156px;
+        height: 156px;
+    }
+
+    .timer-display {
+        font-size: 2rem;
+    }
+
+    .hero-badge-glow {
+        width: 72px;
+        height: 72px;
+        border-radius: 20px;
+    }
+
+    .hero-badge-glow img {
+        width: 48px;
+        height: 48px;
+    }
+}
+
+/* Hover micro-interactions only on mouse/trackpad devices (no sticky hover on touch) */
+@media (hover: hover) and (pointer: fine) {
+    .primary-action-btn:hover:not(:disabled),
+    .success-action-btn:hover:not(:disabled),
+    .coral-action-btn:hover:not(:disabled),
+    .hold-reveal-btn:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.04);
+    }
+
+    .secondary-action-btn:hover,
+    .soft-action-btn:hover {
+        border-color: var(--brand);
+    }
+
+    .avatar-option:hover:not(.selected) {
+        transform: scale(1.06);
+        border-color: var(--brand-border);
+    }
+
+    .chip-btn:hover:not(.active),
+    .lang-btn:hover:not(.active),
+    .difficulty-btn:hover:not(.active),
+    .segment-btn:hover:not(.active):not(:disabled) {
+        border-color: var(--brand-border);
+        background: var(--brand-soft);
+    }
+
+    .player-remove-btn:hover {
+        filter: brightness(0.95);
+        transform: scale(1.06);
+    }
+}
+
+/* Reduced motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
 }
 
 /* Blazor error UI */

@@ -15,14 +15,24 @@
 
 .app-content {
     width: 100%;
-    max-width: 520px;
+    max-width: 1020px;
     margin: 0 auto;
-    padding: 14px 14px calc(28px + env(safe-area-inset-bottom, 0px));
+    padding:
+        12px
+        max(12px, env(safe-area-inset-right, 0px))
+        calc(24px + env(safe-area-inset-bottom, 0px))
+        max(12px, env(safe-area-inset-left, 0px));
     flex: 1;
 }
 
 @media (min-width: 640px) {
     .app-content {
-        padding: 24px 18px 40px;
+        padding: 20px 20px 36px;
+    }
+}
+
+@media (min-width: 960px) {
+    .app-content {
+        padding: 28px 24px 48px;
     }
 }

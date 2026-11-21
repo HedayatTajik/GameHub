@@ -6,12 +6,13 @@
 
 <PageTitle>@L.NavAbout</PageTitle>
 
-<div class="page-stack">
+<div class="stage-container stage-lg page-stack">
     <div class="game-card">
-        <h2 style="margin:0; font-family:var(--font-display); font-size:1.75rem; font-weight:var(--display-weight); color:var(--text-main); text-align:center;">
+        <h2 style="margin:0; font-family:var(--font-display); font-size:clamp(1.45rem, 4.5vw, 1.9rem); font-weight:var(--display-weight); color:var(--text-main); text-align:center;">
             @L.T("📖 راهنمای بازی شیاد", "📖 Spielregeln – Imposter", "📖 How to Play Imposter")
         </h2>
 
+        <div class="about-grid">
         @if (L.Language == "de")
         {
             <div class="about-section">
@@ -87,12 +88,15 @@
                 - اگر بازیکنان شیاد را درست شناسایی کنند و او کلمه را نداند، بازیکنان غیرشیاد برنده می‌شوند.
             </div>
         }
+        </div>
 
-        <button type="button"
-                class="success-action-btn"
-                @onclick='() => Navigation.NavigateTo("/impostergame")'>
-            @L.HomeStartButton
-        </button>
+        <div class="about-cta-wrap">
+            <button type="button"
+                    class="success-action-btn"
+                    @onclick='() => Navigation.NavigateTo("/impostergame")'>
+                @L.HomeStartButton
+            </button>
+        </div>
     </div>
 </div>
 
